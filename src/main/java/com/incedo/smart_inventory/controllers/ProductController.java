@@ -12,51 +12,64 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.incedo.smart_inventory.entities.Supplier;
-import com.incedo.smart_inventory.repositories.SupplierRepository;
+import com.incedo.smart_inventory.entities.Product;
+import com.incedo.smart_inventory.repositories.ProductRepository;
 
 @RestController
-public class SupplierController {
+@ResponseBody
+public class ProductController {
 	
 	@Autowired
-	SupplierRepository supplierRepository;
+	ProductRepository productRepository;
 	
-	@GetMapping(path="/suppliers")
-	public ResponseEntity<List<Supplier>> getSuppliers() {
-		return new ResponseEntity<List<Supplier>>(supplierRepository.findAll(), HttpStatus.OK);
+	@GetMapping(path="/products")
+	public ResponseEntity<List<Product>> product() {
+		return new ResponseEntity<List<Product>>(productRepository.findAll(), HttpStatus.OK);
 	}
 	
-	@PostMapping(path="/suppliers")
-	public ResponseEntity<Void> addSupplier(@RequestBody Supplier supplier) {
-		supplierRepository.save(supplier);
+	@GetMapping(path="/products/{id}")
+	public ResponseEntity findById(@PathVariable int id) {
+		Optional<Product> productFound = productRepository.findById(id);
+		
+		if(productFound.isPresent()) {
+			return new ResponseEntity<Product>(productFound.get(), HttpStatus.OK);
+		}
+		
+		return new ResponseEntity<String>("The resource with the given id doesn't exist", HttpStatus.NOT_FOUND);
+	}
+	
+	@PostMapping(path="/products")
+	public ResponseEntity<Void> createEntity(@RequestBody Product product) {
+		productRepository.save(product);
 		return new ResponseEntity<Void>(HttpStatus.CREATED);
 	}
 	
-	@PutMapping(path="/suppliers/{id}")
-	public ResponseEntity<String> editSupplier(@RequestBody Supplier supplier, @PathVariable int id) {
-		Optional<Supplier> supplierFound = supplierRepository.findById(id);
+	@PutMapping(path="/products/{id}")
+	public ResponseEntity<String> updateEntity(@PathVariable int id,@RequestBody Product product) {
+		Optional<Product> productFound = productRepository.findById(id);
 		
-		if (supplierFound.isPresent()) {
-			supplier.setId(id);
-			supplierRepository.save(supplier);
+		if(productFound.isPresent()) {
+			product.setId(id);
+			productRepository.save(product);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
-		else {
-			return new ResponseEntity<String>("Supplier with the given id not found.", HttpStatus.NOT_FOUND);
-		}
+		
+		return new ResponseEntity<String>("Record with the given id not found.", HttpStatus.NOT_FOUND);
 	}
 	
-	@DeleteMapping(path="/suppliers/{id}")
-	public ResponseEntity<Void> deleteSupplier(@PathVariable int id) {
-		supplierRepository.deleteById(id);
+	@DeleteMapping(path="/products/{id}")
+	public ResponseEntity<Void> deleteEntity(@PathVariable int id) {
+		productRepository.deleteById(id);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 	
@@ -83,5 +96,4 @@ public class SupplierController {
     public ResponseEntity<String> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
 		return new ResponseEntity<String>("The resource with given id does not exist.", HttpStatus.BAD_REQUEST);
     }
-	
 }

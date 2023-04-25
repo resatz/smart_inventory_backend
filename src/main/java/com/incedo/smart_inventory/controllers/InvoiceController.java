@@ -12,52 +12,51 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.incedo.smart_inventory.entities.Supplier;
-import com.incedo.smart_inventory.repositories.SupplierRepository;
+import com.incedo.smart_inventory.entities.Invoice;
+import com.incedo.smart_inventory.repositories.InvoiceRepository;
 
 @RestController
-public class SupplierController {
+@ResponseBody
+public class InvoiceController {
 	
 	@Autowired
-	SupplierRepository supplierRepository;
+	InvoiceRepository invoiceRespository;
 	
-	@GetMapping(path="/suppliers")
-	public ResponseEntity<List<Supplier>> getSuppliers() {
-		return new ResponseEntity<List<Supplier>>(supplierRepository.findAll(), HttpStatus.OK);
+	@GetMapping(path="/invoice")
+	public ResponseEntity<List<Invoice>> invoice() {
+		return ResponseEntity.ok(invoiceRespository.findAll());
 	}
 	
-	@PostMapping(path="/suppliers")
-	public ResponseEntity<Void> addSupplier(@RequestBody Supplier supplier) {
-		supplierRepository.save(supplier);
-		return new ResponseEntity<Void>(HttpStatus.CREATED);
-	}
-	
-	@PutMapping(path="/suppliers/{id}")
-	public ResponseEntity<String> editSupplier(@RequestBody Supplier supplier, @PathVariable int id) {
-		Optional<Supplier> supplierFound = supplierRepository.findById(id);
+	@GetMapping(path="/invoice/{id}")
+	public ResponseEntity findById(@PathVariable int id) {
+		Optional<Invoice> invoiceFound = invoiceRespository.findById(id);
 		
-		if (supplierFound.isPresent()) {
-			supplier.setId(id);
-			supplierRepository.save(supplier);
-			return new ResponseEntity<>(HttpStatus.OK);
+		if(invoiceFound.isPresent()) {
+			return new ResponseEntity<Invoice>(invoiceFound.get(), HttpStatus.OK);
 		}
-		else {
-			return new ResponseEntity<String>("Supplier with the given id not found.", HttpStatus.NOT_FOUND);
-		}
+		
+		return new ResponseEntity<String>("The resource with given id doesn't exist", HttpStatus.NOT_FOUND);
 	}
 	
-	@DeleteMapping(path="/suppliers/{id}")
-	public ResponseEntity<Void> deleteSupplier(@PathVariable int id) {
-		supplierRepository.deleteById(id);
-		return new ResponseEntity<Void>(HttpStatus.OK);
+	@PostMapping(path="/invoice")
+	public ResponseEntity<String> addInvoice(@RequestBody Invoice invoice) {
+		invoiceRespository.save(invoice);
+		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+	
+	@DeleteMapping(path="/invoice/{id}")
+	public ResponseEntity<Void> deleteEntity(@PathVariable int id) {
+		invoiceRespository.deleteById(id);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@ExceptionHandler(ConstraintViolationException.class)

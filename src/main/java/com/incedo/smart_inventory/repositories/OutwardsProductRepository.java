@@ -1,0 +1,9 @@
+package com.incedo.smart_inventory.repositories;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.incedo.smart_inventory.entities.OutwardsProduct;
+
+public interface OutwardsProductRepository extends JpaRepository<OutwardsProduct, Integer>{
+	
+}

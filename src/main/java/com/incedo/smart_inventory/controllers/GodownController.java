@@ -1,6 +1,7 @@
 package com.incedo.smart_inventory.controllers;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,85 +14,69 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.incedo.smart_inventory.entities.InwardsProduct;
-import com.incedo.smart_inventory.entities.Supplier;
-import com.incedo.smart_inventory.repositories.InwardsProductRepository;
-import com.incedo.smart_inventory.repositories.SupplierRepository;
+import com.incedo.smart_inventory.entities.Godown;
+import com.incedo.smart_inventory.repositories.GodownRepository;
 
+@ResponseBody
 @RestController
-public class InwardsProductController {
+public class GodownController {
 	
 	@Autowired
-	InwardsProductRepository inwardsProductRepository;
+	GodownRepository godownRepository;
 	
-	@Autowired
-	SupplierRepository supplierRepository;
-	
-	@GetMapping(path="/inwards")
-	public ResponseEntity<List<InwardsProduct>> getProducts() {
-		return new ResponseEntity<List<InwardsProduct>>(inwardsProductRepository.findAll(), HttpStatus.OK);
+	@GetMapping(path="/godowns")
+	public ResponseEntity<List<Godown>> godown() {
+		return new ResponseEntity<List<Godown>>(godownRepository.findAll(), HttpStatus.OK);
 	}
 	
-	@PostMapping(path="/inwards")
-	public ResponseEntity<String> addProduct(@RequestBody InwardsProduct inwardsProduct) {
-		if (inwardsProduct.getSupplyDate() == LocalDate.MIN) {
+	@GetMapping(path="/godowns/{id}")
+	public ResponseEntity findById(@PathVariable int id) {
+		Optional<Godown> godownFound = godownRepository.findById(id);
+		
+		if(godownFound.isEmpty()) {
+			return new ResponseEntity<String>("The given id is not found", HttpStatus.NOT_FOUND);
+		}
+		
+		return new ResponseEntity<Godown>(godownFound.get(), HttpStatus.OK);
+	}
+
+	@PostMapping(path="/godowns")
+	public ResponseEntity<String> addGodown(@RequestBody Godown godown) {
+		if(godown.getStartDate() == LocalDate.MIN) {
 			return new ResponseEntity<String>("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.", HttpStatus.BAD_REQUEST);
 		}
 		
-		if (inwardsProduct.getReceivedFrom() != null && inwardsProduct.getReceivedFrom().getId() > 0) {
-			Optional<Supplier> supplierFound = supplierRepository.findById(inwardsProduct.getReceivedFrom().getId());
-			
-			if (supplierFound.isEmpty()) {
-				return new ResponseEntity<String>("Supplier with the given id not found.", HttpStatus.NOT_FOUND);
-			}
-			
-			inwardsProduct.setReceivedFrom(supplierFound.get());
-		}
-		
-		inwardsProductRepository.save(inwardsProduct);
+		godownRepository.save(godown);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
-	@PutMapping(path="/inwards/{id}")
-	public ResponseEntity<String> editProduct(@RequestBody InwardsProduct inwardsProduct, @PathVariable int id) {
-		Optional<InwardsProduct> inwardsProductFound = inwardsProductRepository.findById(id);
+	@PutMapping(path="/godowns/{id}")
+	public ResponseEntity<Void> updateEntity(@PathVariable int id,@RequestBody Godown g) {
+		Optional<Godown> godownFound = godownRepository.findById(id);
 		
-		if (inwardsProductFound.isEmpty()) {
-			return new ResponseEntity<String>("Record with the given id not found.", HttpStatus.NOT_FOUND);
+		if(godownFound.isPresent()) {
+			g.setId(id);
+			godownRepository.save(g);
+			return new ResponseEntity<Void>(HttpStatus.OK);
 		}
 		
-		if (inwardsProduct.getSupplyDate() == LocalDate.MIN) {
-			return new ResponseEntity<String>("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.", HttpStatus.BAD_REQUEST);
-		}
-		
-		inwardsProduct.setId(id);
-		
-		if (inwardsProduct.getReceivedFrom() != null && inwardsProduct.getReceivedFrom().getId() > 0) {
-			Optional<Supplier> supplierFound = supplierRepository.findById(inwardsProduct.getReceivedFrom().getId());
-			
-			if (supplierFound.isEmpty()) {
-				return new ResponseEntity<String>("Supplier with the given id not found.", HttpStatus.NOT_FOUND);
-			}
-			
-			inwardsProduct.setReceivedFrom(supplierFound.get());
-		}
-		
-		inwardsProductRepository.save(inwardsProduct);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 	}
 	
-	@DeleteMapping(path="/inwards/{id}")
-	public ResponseEntity<Void> deleteProduct(@PathVariable int id) {
-		inwardsProductRepository.deleteById(id);
-		return new ResponseEntity<Void>(HttpStatus.OK);
+	@DeleteMapping(path="/godowns/{id}")
+	public ResponseEntity<Void> deleteEntity(@PathVariable int id) {
+		godownRepository.deleteById(id);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
 	@ExceptionHandler(ConstraintViolationException.class)
