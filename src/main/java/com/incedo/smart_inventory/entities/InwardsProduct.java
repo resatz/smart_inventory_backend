@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -35,19 +36,19 @@ public class InwardsProduct {
 	
 	@NotNull
 	@ManyToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-	private Supplier receivedFrom;
+	private Supplier supplier;
 	
 	@NotNull
-	@Column(name = "invoice_id")
-	private Integer invoiceId = null;
+	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
+	private Invoice invoice = null;
 	
 	@NotNull
-	@Column(name = "godown_id")
-	private Integer godownId = null;
+	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
+	private Godown godown = null;
 	
 	@NotNull
-	@Column(name = "product_id")
-	private Integer productId = null;
+	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
+	private Product product = null;
 	
 	public Integer getId() {
 		return id;
@@ -67,36 +68,36 @@ public class InwardsProduct {
 	public void setReceiptNo(Integer receiptNo) {
 		this.receiptNo = receiptNo;
 	}
-	public Supplier getReceivedFrom() {
-		return receivedFrom;
+	public Supplier getSupplier() {
+		return supplier;
 	}
-	public void setReceivedFrom(Supplier receivedFrom) {
-		this.receivedFrom = receivedFrom;
+	public void setSupplier(Supplier supplier) {
+		this.supplier = supplier;
 	}
-	public Integer getInvoiceId() {
-		return invoiceId;
+	public Invoice getInvoice() {
+		return invoice;
 	}
-	public void setInvoiceId(Integer invoiceId) {
-		this.invoiceId = invoiceId;
+	public void setInvoice(Invoice invoice) {
+		this.invoice = invoice;
 	}
-	public Integer getGodownId() {
-		return godownId;
+	public Godown getGodown() {
+		return godown;
 	}
-	public void setGodownId(Integer godownId) {
-		this.godownId = godownId;
+	public void setGodown(Godown godown) {
+		this.godown = godown;
 	}
-	public Integer getProductId() {
-		return productId;
+	public Product getProduct() {
+		return product;
 	}
-	public void setProductId(Integer productId) {
-		this.productId = productId;
+	public void setProduct(Product product) {
+		this.product = product;
 	}
 
 	@Override
 	public String toString() {
 		return "InwardsProduct [id=" + id + ", supplyDate=" + supplyDate + ", receiptNo=" + receiptNo
-				+ ", receivedFrom=" + receivedFrom + ", invoiceId=" + invoiceId + ", godownId=" + godownId
-				+ ", productId=" + productId + "]";
+				+ ", supplier=" + supplier + ", invoice=" + invoice + ", godown=" + godown
+				+ ", product=" + product + "]";
 	}	
 	
 }
