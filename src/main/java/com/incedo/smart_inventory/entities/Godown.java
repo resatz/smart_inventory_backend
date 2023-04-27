@@ -2,11 +2,13 @@ package com.incedo.smart_inventory.entities;
 
 import java.time.LocalDate;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
@@ -32,9 +34,8 @@ public class Godown {
 	@Column(name="capacity_in_quintals")
 	private Double capacityInQuintals= null;
 	
-	@NotNull
-	@Column(name="manager_id")
-	private Integer managerId= null;
+	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private Employee manager;
 	
 	@NotNull
 	@Column(name="start_date")
@@ -60,11 +61,12 @@ public class Godown {
 	public void setCapacityInQuintals(Double capacityInQuintals) {
 		this.capacityInQuintals = capacityInQuintals;
 	}
-	public Integer getManagerId() {
-		return managerId;
+	
+	public Employee getManager() {
+		return manager;
 	}
-	public void setManagerId(Integer managerId) {
-		this.managerId = managerId;
+	public void setManager(Employee manager) {
+		this.manager = manager;
 	}
 	public LocalDate getStartDate() {
 		return startDate;
@@ -75,9 +77,8 @@ public class Godown {
 	
 	@Override
 	public String toString() {
-		return "Godowns [id=" + id + ", location=" + location + ", capacityInQuintals=" + capacityInQuintals
-				+ ", managerId=" + managerId + ", startDate=" + startDate + "]";
+		return "Godown [id=" + id + ", location=" + location + ", capacityInQuintals=" + capacityInQuintals
+				+ ", employees=" + manager + ", startDate=" + startDate + "]";
 	}
-	
 }
 

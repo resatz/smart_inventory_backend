@@ -1,10 +1,12 @@
 package com.incedo.smart_inventory.entities;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -22,9 +24,8 @@ public class Invoice {
 	@Column(name="bill_value")
 	private Double billValue= null;
 	
-	@NotNull
-	@Column(name="bill_checked_by_id")
-	private Integer billCheckedById;
+	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH})
+	private Employee billCheckedBy;
 	
 	public Integer getId() {
 		return id;
@@ -44,17 +45,16 @@ public class Invoice {
 	public void setBillValue(Double billValue) {
 		this.billValue = billValue;
 	}
-	public Integer getBillCheckedById() {
-		return billCheckedById;
+	public Employee getBillCheckedBy() {
+		return billCheckedBy;
 	}
-	public void setBillCheckedById(Integer billCheckedById) {
-		this.billCheckedById = billCheckedById;
+	public void setBillCheckedBy(Employee billCheckedBy) {
+		this.billCheckedBy = billCheckedBy;
 	}
 	
 	@Override
 	public String toString() {
-		return "Invoice [id=" + id + ", quantity=" + quantity + ", billValue=" + billValue + ", billCheckedById="
-				+ billCheckedById + "]";
+		return "Invoice [id=" + id + ", quantity=" + quantity + ", billValue=" + billValue + ", billCheckedBy=" + billCheckedBy
+				+ "]";
 	}
-	
 }

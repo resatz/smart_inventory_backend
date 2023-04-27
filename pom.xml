@@ -11,7 +11,7 @@
 	<groupId>com.incedo</groupId>
 	<artifactId>smart_inventory</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>smart_inventory</name>
 	<description>Smart Inventory Management Application</description>
 	<properties>

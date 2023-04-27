@@ -9,8 +9,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
-public class Employees {
+public class Employee {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,10 +27,10 @@ public class Employees {
 	
 	@NotNull
 	@Column(name="password_hash")
-	private String passwordHash;
+	private String password;
 	
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-	private EmployeeRoles rollId;
+	private EmployeeRoles role;
 
 	public int getId() {
 		return id;
@@ -53,33 +56,26 @@ public class Employees {
 		this.username = username;
 	}
 
-	public String getPasswordHash() {
-		return passwordHash;
+	@JsonIgnore
+	public String getPassword() {
+		return password;
 	}
 
-	public void setPasswordHash(String passwordHash) {
-		this.passwordHash = passwordHash;
+	@JsonProperty
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public EmployeeRoles getRole() {
+		return role;
 	}
 
-	
-
-
-	
-
-	public EmployeeRoles getRollId() {
-		return rollId;
-	}
-
-	public void setRollId(EmployeeRoles rollId) {
-		this.rollId = rollId;
+	public void setRole(EmployeeRoles role) {
+		this.role = role;
 	}
 
 	@Override
 	public String toString() {
-		return "Employees [id=" + id + ", name=" + name + ", username=" + username + ", passwordHash=" + passwordHash
-				+ ", rollId=" + rollId + "]";
+		return "Employees [id=" + id + ", name=" + name + ", username=" + username + ", password=" + password
+				+ ", role=" + role + "]";
 	}
-	
-	
-	
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class EmployeeRolesController
 	EmployeeRolesRepository employeeRolesRepository;
 	
 	
-	@PostMapping("/employeeroles")
+	@PostMapping("/employeeRoles")
 	public ResponseEntity<Void> addemployeeroles(@RequestBody EmployeeRoles e) {
 	   employeeRolesRepository.save(e);
 	   ResponseEntity<Void> re = new ResponseEntity<>(HttpStatus.CREATED);
@@ -35,12 +36,12 @@ public class EmployeeRolesController
 	}
 	
 	
-	@GetMapping(path="/employeeroles")
+	@GetMapping(path="/employeeRoles")
 	public ResponseEntity<List<EmployeeRoles>> getEmployeeRoles() {
 		return new ResponseEntity<List<EmployeeRoles>>(employeeRolesRepository.findAll(), HttpStatus.OK);
 	}
     
-	@GetMapping(path="/employeeroles/{id}")
+	@GetMapping(path="/employeeRoles/{id}")
 	public ResponseEntity findById(@PathVariable int id) {
 		Optional<EmployeeRoles> roleFound = employeeRolesRepository.findById(id);
 		
@@ -51,14 +52,14 @@ public class EmployeeRolesController
 		return new ResponseEntity<String>("The Employee role with the given id doesn't exist", HttpStatus.NOT_FOUND);
 	}
 	
-	@DeleteMapping(path="/employeeroles/{id}")
+	@DeleteMapping(path="/employeeRoles/{id}")
 	public ResponseEntity<Void> deleteEmployee(@PathVariable int id) {
 		employeeRolesRepository.deleteById(id);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 	
 	
-	@PutMapping(path="/employeeroles/{id}")
+	@PutMapping(path="/employeeRoles/{id}")
 	public ResponseEntity<String> editEmployeeRoles(@RequestBody EmployeeRoles employeeRoles, @PathVariable int id) {
 		Optional<EmployeeRoles> roles = employeeRolesRepository.findById(id);
 		
@@ -91,6 +92,10 @@ public class EmployeeRolesController
 		return new ResponseEntity<String>(String.format("`%s` should be of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
 	
+	@ExceptionHandler(EmptyResultDataAccessException.class)
+    public ResponseEntity<String> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
+		return new ResponseEntity<String>("The resource with given id does not exist.", HttpStatus.BAD_REQUEST);
+    }
 }
 
 		

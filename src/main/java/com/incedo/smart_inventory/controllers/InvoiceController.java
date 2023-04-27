@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.Invoice;
+import com.incedo.smart_inventory.repositories.EmployeeRepository;
 import com.incedo.smart_inventory.repositories.InvoiceRepository;
 
 @RestController
@@ -30,6 +32,9 @@ public class InvoiceController {
 	
 	@Autowired
 	InvoiceRepository invoiceRespository;
+	
+	@Autowired
+	EmployeeRepository employeeRepository;
 	
 	@GetMapping(path="/invoice")
 	public ResponseEntity<List<Invoice>> invoice() {
@@ -49,6 +54,16 @@ public class InvoiceController {
 	
 	@PostMapping(path="/invoice")
 	public ResponseEntity<String> addInvoice(@RequestBody Invoice invoice) {
+		
+		if(invoice.getBillCheckedBy()!=null && invoice.getBillCheckedBy().getId()>0) {
+			Optional<Employee> employeeFound = employeeRepository.findById(invoice.getBillCheckedBy().getId());
+			
+			if(employeeFound.isEmpty()) {
+				return new ResponseEntity<String>("The employee with the given id is not found",HttpStatus.NOT_FOUND);
+			}
+			invoice.setBillCheckedBy(employeeFound.get());
+		}
+			
 		invoiceRespository.save(invoice);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}

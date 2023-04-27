@@ -45,15 +45,17 @@ public class OutwardsProduct {
 	private Integer receiptNo=null;
 	
 	@NotNull
-	@Column(name="delivered_to_id")
-	private Integer deliveredToId=null;
+	@Column(name="delivered_to")
+	private String deliveredTo;
 	
-	@NotNull
-	@Column(name="invoice_id")
-	private Integer invoiceId=null;
+	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
+	private Invoice invoice;
 	
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
 	private Godown godown;
+	
+	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private Product product;
 	
 	public Integer getId() {
 		return id;
@@ -85,17 +87,18 @@ public class OutwardsProduct {
 	public void setReceiptNo(Integer receiptNo) {
 		this.receiptNo = receiptNo;
 	}
-	public Integer getDeliveredToId() {
-		return deliveredToId;
+	public String getDeliveredTo() {
+		return deliveredTo;
 	}
-	public void setDeliveredToId(Integer deliveredToId) {
-		this.deliveredToId = deliveredToId;
+	public void setDeliveredTo(String deliveredTo) {
+		this.deliveredTo = deliveredTo;
 	}
-	public Integer getInvoiceId() {
-		return invoiceId;
+	
+	public Invoice getInvoice() {
+		return invoice;
 	}
-	public void setInvoiceId(Integer invoiceId) {
-		this.invoiceId = invoiceId;
+	public void setInvoice(Invoice invoice) {
+		this.invoice = invoice;
 	}
 	public Godown getGodown() {
 		return godown;
@@ -104,11 +107,17 @@ public class OutwardsProduct {
 		this.godown = godown;
 	}
 	
-	@Override
-	public String toString() {
-		return "OutwardsRegister [id=" + id + ", supplyDate=" + supplyDate + ", deliveryDate=" + deliveryDate
-				+ ", purpose=" + purpose + ", receiptNo=" + receiptNo + ", deliveredToId=" + deliveredToId
-				+ ", invoiceId=" + invoiceId + ", godown=" + godown + "]";
+	public Product getProduct() {
+		return product;
+	}
+	public void setProduct(Product product) {
+		this.product = product;
 	}
 	
+	@Override
+	public String toString() {
+		return "OutwardsProduct [id=" + id + ", supplyDate=" + supplyDate + ", deliveryDate=" + deliveryDate
+				+ ", purpose=" + purpose + ", receiptNo=" + receiptNo + ", deliveredTo=" + deliveredTo
+				+ ", invoice=" + invoice + ", godown=" + godown + ", product=" + product + "]";
+	}
 }

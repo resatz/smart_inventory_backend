@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.validation.ConstraintViolationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.incedo.smart_inventory.entities.EmployeeRoles;
-import com.incedo.smart_inventory.entities.Employees;
+import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.Godown;
 import com.incedo.smart_inventory.entities.OutwardsProduct;
 import com.incedo.smart_inventory.entities.Product;
@@ -39,43 +40,40 @@ public class EmployeeController {
 	EmployeeRolesRepository employeerolesrepository;
 	
 	
-	
-	
 	@PostMapping(path="/employees")
-	public ResponseEntity<String> addEmployees(@RequestBody Employees employees) {
+	public ResponseEntity<String> addEmployees(@RequestBody Employee employee) {
 		
 		
-		if(employees.getRollId() != null && employees.getRollId().getId() > 0) {
-			Optional<EmployeeRoles> employeeFound = employeerolesrepository.findById(employees.getRollId().getId());
+		if(employee.getRole()!=null && employee.getRole().getId()>0) {
+			Optional<EmployeeRoles> employeeRoleFound = employeerolesrepository.findById(employee.getRole().getId());
 			
-			if(employeeFound.isEmpty()) {
-				return new ResponseEntity<String>("EmployeeRole with the given id is not found.", HttpStatus.NOT_FOUND);
+			if(employeeRoleFound.isEmpty()) {
+				return new ResponseEntity<String>("The employee role with the given id is not found",HttpStatus.NOT_FOUND);
 			}
-			
-			employees.setRollId(employeeFound.get());
+			employee.setRole(employeeRoleFound.get());
 		}
 		
-		employeeRepository.save(employees);
+		employeeRepository.save(employee);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 	
 	
 	
 	@GetMapping("/employees")
-	public List<Employees> fetchAllEmployees()
+	public List<Employee> fetchAllEmployees()
 	{
 		return employeeRepository.findAll();
 	}
 	
 
 	@GetMapping("/employees/{id}")
-    public ResponseEntity<Employees> getById(@PathVariable int id) {
+    public ResponseEntity<Employee> getById(@PathVariable int id) {
 
-        Optional<Employees> employee = employeeRepository.findById(id);
+        Optional<Employee> employee = employeeRepository.findById(id);
         if (employee.isPresent()) {
-            return new ResponseEntity<Employees>(employee.get(), HttpStatus.FOUND);
+            return new ResponseEntity<Employee>(employee.get(), HttpStatus.FOUND);
         } else {
-            return new ResponseEntity<Employees>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<Employee>(HttpStatus.NOT_FOUND);
         }
     }
 	
@@ -89,16 +87,25 @@ public class EmployeeController {
 	
 		
 	@PutMapping(path="/employees/{id}")
-	public ResponseEntity<String> updateEntity(@PathVariable int id,@RequestBody Employees employee) {
-		Optional<Employees> employeeFound = employeeRepository.findById(id);
+	public ResponseEntity<String> updateEntity(@PathVariable int id, @RequestBody Employee employee) {
+		Optional<Employee> employeeFound = employeeRepository.findById(id);
 		
-		if(employeeFound.isPresent()) {
-			employee.setId(id);
-			employeeRepository.save(employee);
-			return new ResponseEntity<>(HttpStatus.OK);
+		if(employeeFound.isEmpty()) {
+			return new ResponseEntity<String>("Employee with the given id not found.", HttpStatus.NOT_FOUND);
 		}
 		
-		return new ResponseEntity<String>("Employee with the given id not found.", HttpStatus.NOT_FOUND);
+		employee.setId(id);
+		
+		if(employee.getRole()!=null && employee.getRole().getId()>0) {
+			Optional<EmployeeRoles> employeeRoleFound = employeerolesrepository.findById(employee.getRole().getId());
+			
+			if(employeeRoleFound.isEmpty()) {
+				return new ResponseEntity<String>("The employee role with the given id is not found",HttpStatus.NOT_FOUND);
+			}
+			employee.setRole(employeeRoleFound.get());
+		}
+		employeeRepository.save(employee);
+		return new  ResponseEntity<>(HttpStatus.OK);
 	}
 	
 		
@@ -119,5 +126,10 @@ public class EmployeeController {
 	@ExceptionHandler(MismatchedInputException.class)
     public ResponseEntity<String> handleMismatchedInputException(MismatchedInputException ex) {
 		return new ResponseEntity<String>(String.format("`%s` should be of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName()), HttpStatus.BAD_REQUEST);
+    }
+	
+	@ExceptionHandler(EmptyResultDataAccessException.class)
+    public ResponseEntity<String> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
+		return new ResponseEntity<String>("The resource with given id does not exist.", HttpStatus.BAD_REQUEST);
     }
 }

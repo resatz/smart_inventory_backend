@@ -28,19 +28,19 @@ import com.incedo.smart_inventory.entities.Invoice;
 import com.incedo.smart_inventory.entities.InwardsProduct;
 import com.incedo.smart_inventory.entities.OutwardsProduct;
 import com.incedo.smart_inventory.entities.Product;
-import com.incedo.smart_inventory.entities.Returns;
+import com.incedo.smart_inventory.entities.ReturnsProduct;
 import com.incedo.smart_inventory.entities.Supplier;
 import com.incedo.smart_inventory.repositories.GodownRepository;
 import com.incedo.smart_inventory.repositories.InvoiceRepository;
 import com.incedo.smart_inventory.repositories.ProductRepository;
-import com.incedo.smart_inventory.repositories.ReturnRepository;
+import com.incedo.smart_inventory.repositories.ReturnsProductRepository;
 
 
 @RestController
-public class ReturnController {
+public class ReturnsProductController {
 	
 	@Autowired
-	ReturnRepository returnRepository;
+	ReturnsProductRepository returnsProductRepository;
 	
 	@Autowired
 	ProductRepository productRepository;
@@ -52,125 +52,104 @@ public class ReturnController {
 	InvoiceRepository invoiceRepository;
 
 	@GetMapping("/returns")
-	public List<Returns> fetchAllReservations(){
-		return returnRepository.findAll();
+	public List<ReturnsProduct> fetchAllReservations(){
+		return returnsProductRepository.findAll();
 	}
 
-	
-	
 	@GetMapping("/returns/{id}")
-    public ResponseEntity<Returns> getById(@PathVariable int id) {
+    public ResponseEntity<ReturnsProduct> getById(@PathVariable int id) {
 
-        Optional<Returns> returns = returnRepository.findById(id);
-        if (returns.isPresent()) {
-            return new ResponseEntity<Returns>(returns.get(), HttpStatus.FOUND);
+        Optional<ReturnsProduct> returnsProduct = returnsProductRepository.findById(id);
+        if (returnsProduct.isPresent()) {
+            return new ResponseEntity<ReturnsProduct>(returnsProduct.get(), HttpStatus.FOUND);
         } else {
-            return new ResponseEntity<Returns>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<ReturnsProduct>(HttpStatus.NOT_FOUND);
         }
     }
 	
-	
-	
 	@PutMapping(path="/returns/{id}")
-	public ResponseEntity<String> editReturns(@RequestBody Returns returns, @PathVariable int id) {
-		Optional<Returns> returnFound = returnRepository.findById(id);
+	public ResponseEntity<String> editReturns(@RequestBody ReturnsProduct returnsProduct, @PathVariable int id) {
+		Optional<ReturnsProduct> returnFound = returnsProductRepository.findById(id);
 		
 		if (returnFound.isEmpty()) {
 			return new ResponseEntity<String>("Return with the given id not found.", HttpStatus.NOT_FOUND);
 		}
 		
-		if (returns.getDeliveryDate() == LocalDate.MIN|| returns.getReturnDate()==LocalDate.MIN) {
+		if (returnsProduct.getDeliveryDate() == LocalDate.MIN|| returnsProduct.getReturnDate()==LocalDate.MIN) {
 			return new ResponseEntity<String>("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.", HttpStatus.BAD_REQUEST);
 		}
 		
-		returns.setId(id);
+		returnsProduct.setId(id);
 		
-		if (returns.getInvoiceId() != null && returns.getInvoiceId().getId() > 0) {
-			Optional<Invoice> invoiceFound = invoiceRepository.findById(returns.getInvoiceId().getId());
+		if (returnsProduct.getInvoice() != null && returnsProduct.getInvoice().getId() > 0) {
+			Optional<Invoice> invoiceFound = invoiceRepository.findById(returnsProduct.getInvoice().getId());
 			
 			if (invoiceFound.isEmpty()) {
 				return new ResponseEntity<String>("Invoice with the given id not found.", HttpStatus.NOT_FOUND);
 			}
 			
-			returns.setInvoiceId(invoiceFound.get());
+			returnsProduct.setInvoice(invoiceFound.get());
 		}
 		
-		if (returns.getProductId() != null && returns.getProductId().getId() > 0) {
-			Optional<Product> productFound = productRepository.findById(returns.getProductId().getId());
+		if (returnsProduct.getProduct() != null && returnsProduct.getProduct().getId() > 0) {
+			Optional<Product> productFound = productRepository.findById(returnsProduct.getProduct().getId());
 			
 			if (productFound.isEmpty()) {
 				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
 			}
-			returns.setProductId(productFound.get());
+			returnsProduct.setProduct(productFound.get());
 		}
-		if (returns.getGodownId() != null && returns.getGodownId().getId() > 0) {
-			Optional<Godown> godownFound = godownRepository.findById(returns.getGodownId().getId());
+		if (returnsProduct.getGodown() != null && returnsProduct.getGodown().getId() > 0) {
+			Optional<Godown> godownFound = godownRepository.findById(returnsProduct.getGodown().getId());
 			
 			if (godownFound.isEmpty()) {
 				return new ResponseEntity<String>("Godown with the given id not found.", HttpStatus.NOT_FOUND);
 			}
-			returns.setGodownId(godownFound.get());
+			returnsProduct.setGodown(godownFound.get());
 		}
 		
-		returnRepository.save(returns);
+		returnsProductRepository.save(returnsProduct);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	
-	
-	
-	
-	
-	
-	
 	@PostMapping(path="/returns")
-	public ResponseEntity<String> addReturn(@RequestBody Returns returns) {
-		if(returns.getDeliveryDate() == LocalDate.MIN || returns.getReturnDate() == LocalDate.MIN) {
+	public ResponseEntity<String> addReturn(@RequestBody ReturnsProduct returnsProduct) {
+		if(returnsProduct.getDeliveryDate() == LocalDate.MIN || returnsProduct.getReturnDate() == LocalDate.MIN) {
 			return new ResponseEntity<String> ("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.",HttpStatus.BAD_REQUEST);
 		}
-		if (returns.getInvoiceId() != null && returns.getInvoiceId().getId() > 0) {
-			Optional<Invoice> invoiceFound = invoiceRepository.findById(returns.getInvoiceId().getId());
+		if (returnsProduct.getInvoice() != null && returnsProduct.getInvoice().getId() > 0) {
+			Optional<Invoice> invoiceFound = invoiceRepository.findById(returnsProduct.getInvoice().getId());
 			
 			if (invoiceFound.isEmpty()) {
 				return new ResponseEntity<String>("Invoice with the given id not found.", HttpStatus.NOT_FOUND);
 			}
-			returns.setInvoiceId(invoiceFound.get());
+			returnsProduct.setInvoice(invoiceFound.get());
 		}
-		if (returns.getProductId() != null && returns.getProductId().getId() > 0) {
-			Optional<Product> productFound = productRepository.findById(returns.getProductId().getId());
+		if (returnsProduct.getProduct() != null && returnsProduct.getProduct().getId() > 0) {
+			Optional<Product> productFound = productRepository.findById(returnsProduct.getProduct().getId());
 			
 			if (productFound.isEmpty()) {
 				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
 			}
-			returns.setProductId(productFound.get());
+			returnsProduct.setProduct(productFound.get());
 		}
-		if (returns.getGodownId() != null && returns.getGodownId().getId() > 0) {
-			Optional<Godown> godownFound = godownRepository.findById(returns.getGodownId().getId());
+		if (returnsProduct.getGodown() != null && returnsProduct.getGodown().getId() > 0) {
+			Optional<Godown> godownFound = godownRepository.findById(returnsProduct.getGodown().getId());
 			
 			if (godownFound.isEmpty()) {
 				return new ResponseEntity<String>("Godown with the given id not found.", HttpStatus.NOT_FOUND);
 			}
-			returns.setGodownId(godownFound.get());
+			returnsProduct.setGodown(godownFound.get());
 		}
-		returnRepository.save(returns);
+		returnsProductRepository.save(returnsProduct);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	    }
-		
-		
-		
-	
-		
-	
-	
 	
 	@DeleteMapping(path="/returns/{id}")
 	public ResponseEntity<Void> deleteReturns(@PathVariable int id) {
-		returnRepository.deleteById(id);
+		returnsProductRepository.deleteById(id);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	
-	
-	
 	
 	@ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
@@ -186,14 +165,10 @@ public class ReturnController {
 		return new ResponseEntity<String>(String.format("`%s` should be of type %s, but the given value \"%s\" is of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName(), ex.getValue(), ex.getValue().getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
 	
-	
 	@ExceptionHandler(MismatchedInputException.class)
     public ResponseEntity<String> handleMismatchedInputException(MismatchedInputException ex) {
 		return new ResponseEntity<String>(String.format("`%s` should be of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName()), HttpStatus.BAD_REQUEST);
     }
-	
-	
-	
 	
 	}
 	

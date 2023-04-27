@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
@@ -16,15 +18,15 @@ import com.incedo.smart_inventory.common.deserializers.LocalDateDeserializer;
 import com.incedo.smart_inventory.common.serializers.LocalDateSerializer;
 
 @Entity
-public class Returns {
+public class ReturnsProduct {
 
 @Id
+@GeneratedValue(strategy = GenerationType.AUTO)
 private int id;
 
 @NotNull
 @Column(name="reason")
 private String reason;
-
 
 @NotNull
 @Column(name="delivery_date")
@@ -44,18 +46,18 @@ private LocalDate returnDate;
 private int receiptNo;
 
 @OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-private Invoice invoiceId;
+private Invoice invoice;
 
 
 
 @Column(name="returned_by")
-private float returnedBy;
+private String returnedBy;
 
 @OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-private Product productId;
+private Product product;
 
 @OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-private Godown godownId;
+private Godown godown;
 
 public int getId() {
 	return id;
@@ -97,43 +99,43 @@ public void setReceiptNo(int receiptNo) {
 	this.receiptNo = receiptNo;
 }
 
-public Invoice getInvoiceId() {
-	return invoiceId;
+public Invoice getInvoice() {
+	return invoice;
 }
 
-public void setInvoiceId(Invoice invoiceId) {
-	this.invoiceId = invoiceId;
+public void setInvoice(Invoice invoice) {
+	this.invoice = invoice;
 }
 
-public float getReturnedBy() {
+public String getReturnedBy() {
 	return returnedBy;
 }
 
-public void setReturnedBy(float returnedBy) {
+public void setReturnedBy(String returnedBy) {
 	this.returnedBy = returnedBy;
 }
 
-public Product getProductId() {
-	return productId;
+public Product getProduct() {
+	return product;
 }
 
-public void setProductId(Product productId) {
-	this.productId = productId;
+public void setProduct(Product product) {
+	this.product = product;
 }
 
-public Godown getGodownId() {
-	return godownId;
+public Godown getGodown() {
+	return godown;
 }
 
-public void setGodownId(Godown godownId) {
-	this.godownId = godownId;
+public void setGodown(Godown godown) {
+	this.godown = godown;
 }
 
 @Override
 public String toString() {
 	return "Returns [id=" + id + ", reason=" + reason + ", deliveryDate=" + deliveryDate + ", returnDate=" + returnDate
-			+ ", receiptNo=" + receiptNo + ", invoiceId=" + invoiceId + ", returnedBy=" + returnedBy + ", productId="
-			+ productId + ", godownId=" + godownId + "]";
+			+ ", receiptNo=" + receiptNo + ", invoiceId=" + invoice + ", returnedBy=" + returnedBy + ", productId="
+			+ product + ", godownId=" + godown + "]";
 }
 
 

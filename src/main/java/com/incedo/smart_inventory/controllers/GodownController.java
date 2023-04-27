@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.Godown;
+import com.incedo.smart_inventory.repositories.EmployeeRepository;
 import com.incedo.smart_inventory.repositories.GodownRepository;
 
 @ResponseBody
@@ -33,6 +35,9 @@ public class GodownController {
 	
 	@Autowired
 	GodownRepository godownRepository;
+	
+	@Autowired
+	EmployeeRepository employeeRepository;
 	
 	@GetMapping(path="/godowns")
 	public ResponseEntity<List<Godown>> godown() {
@@ -52,8 +57,20 @@ public class GodownController {
 
 	@PostMapping(path="/godowns")
 	public ResponseEntity<String> addGodown(@RequestBody Godown godown) {
+		
 		if(godown.getStartDate() == LocalDate.MIN) {
 			return new ResponseEntity<String>("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.", HttpStatus.BAD_REQUEST);
+		}
+		
+		if(godown.getManager()!=null && godown.getManager().getId()>0) {
+			Optional<Employee> employeeFound= employeeRepository.findById(godown.getManager().getId());
+			
+			if(employeeFound.isEmpty()) {
+				return new ResponseEntity<String>("Employee with the given id is not found",HttpStatus.NOT_FOUND);
+			}
+			
+			godown.setManager(employeeFound.get());
+			
 		}
 		
 		godownRepository.save(godown);
@@ -61,16 +78,33 @@ public class GodownController {
 	}
 	
 	@PutMapping(path="/godowns/{id}")
-	public ResponseEntity<Void> updateEntity(@PathVariable int id,@RequestBody Godown g) {
+	public ResponseEntity<String> updateEntity(@PathVariable int id,@RequestBody Godown godown) {
 		Optional<Godown> godownFound = godownRepository.findById(id);
 		
-		if(godownFound.isPresent()) {
-			g.setId(id);
-			godownRepository.save(g);
-			return new ResponseEntity<Void>(HttpStatus.OK);
+		if(godownFound.isEmpty()) {
+			return new ResponseEntity<String>("The godown with the given id is not found",HttpStatus.NOT_FOUND);
 		}
 		
-		return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+		if(godown.getStartDate()== LocalDate.MIN) {
+			return new ResponseEntity<String>("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.", HttpStatus.BAD_REQUEST);
+		}
+		
+		godown.setId(id);
+		
+		if(godown.getManager()!=null && godown.getManager().getId()>0) {
+			Optional<Employee> employeeFound = employeeRepository.findById(godown.getManager().getId());
+			
+			if(employeeFound.isEmpty()) {
+				return new ResponseEntity<String>("The employee with the given id is not found",HttpStatus.NOT_FOUND);
+			}
+			
+			godown.setManager(employeeFound.get());
+		
+		}
+		
+		godownRepository.save(godown);
+		
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 	
 	@DeleteMapping(path="/godowns/{id}")
