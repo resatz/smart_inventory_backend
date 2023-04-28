@@ -3,32 +3,28 @@ package com.incedo.smart_inventory.controllers;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.ConstraintViolationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.Invoice;
 import com.incedo.smart_inventory.repositories.EmployeeRepository;
 import com.incedo.smart_inventory.repositories.InvoiceRepository;
 
 @RestController
-@ResponseBody
+@RequestMapping("/api")
 public class InvoiceController {
+	
+	private static final String PATH = "/invoice";
 	
 	@Autowired
 	InvoiceRepository invoiceRespository;
@@ -36,12 +32,12 @@ public class InvoiceController {
 	@Autowired
 	EmployeeRepository employeeRepository;
 	
-	@GetMapping(path="/invoice")
+	@GetMapping(path=PATH)
 	public ResponseEntity<List<Invoice>> invoice() {
 		return ResponseEntity.ok(invoiceRespository.findAll());
 	}
 	
-	@GetMapping(path="/invoice/{id}")
+	@GetMapping(path=PATH + "/{id}")
 	public ResponseEntity findById(@PathVariable int id) {
 		Optional<Invoice> invoiceFound = invoiceRespository.findById(id);
 		
@@ -52,8 +48,8 @@ public class InvoiceController {
 		return new ResponseEntity<String>("The resource with given id doesn't exist", HttpStatus.NOT_FOUND);
 	}
 	
-	@PostMapping(path="/invoice")
-	public ResponseEntity<String> addInvoice(@RequestBody Invoice invoice) {
+	@PostMapping(path=PATH)
+	public ResponseEntity addInvoice(@RequestBody Invoice invoice) {
 		
 		if(invoice.getBillCheckedBy()!=null && invoice.getBillCheckedBy().getId()>0) {
 			Optional<Employee> employeeFound = employeeRepository.findById(invoice.getBillCheckedBy().getId());
@@ -64,38 +60,14 @@ public class InvoiceController {
 			invoice.setBillCheckedBy(employeeFound.get());
 		}
 			
-		invoiceRespository.save(invoice);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		Invoice saved = invoiceRespository.save(invoice);
+		return new ResponseEntity<Invoice>(saved, HttpStatus.CREATED);
 	}
 	
-	@DeleteMapping(path="/invoice/{id}")
+	@DeleteMapping(path=PATH + "/{id}")
 	public ResponseEntity<Void> deleteEntity(@PathVariable int id) {
 		invoiceRespository.deleteById(id);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	
-	@ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
-		StringBuffer error = new StringBuffer();
-		ex.getConstraintViolations().forEach(violation -> {
-			error.append(violation.getPropertyPath() + " " + violation.getMessage() + "\n");
-		});
-        return new ResponseEntity<String>(error.toString(), HttpStatus.BAD_REQUEST);
-    }
-	
-	@ExceptionHandler(InvalidFormatException.class)
-    public ResponseEntity<String> handleInvalidFormatException(InvalidFormatException ex) {
-		return new ResponseEntity<String>(String.format("`%s` should be of type %s, but the given value \"%s\" is of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName(), ex.getValue(), ex.getValue().getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
-    }
-	
-	@ExceptionHandler(MismatchedInputException.class)
-    public ResponseEntity<String> handleMismatchedInputException(MismatchedInputException ex) {
-		return new ResponseEntity<String>(String.format("`%s` should be of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName()), HttpStatus.BAD_REQUEST);
-    }
-	
-	@ExceptionHandler(EmptyResultDataAccessException.class)
-    public ResponseEntity<String> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
-		return new ResponseEntity<String>("The resource with given id does not exist.", HttpStatus.BAD_REQUEST);
-    }
 	
 }

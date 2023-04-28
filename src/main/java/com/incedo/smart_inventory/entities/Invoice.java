@@ -14,18 +14,19 @@ public class Invoice {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id=null;
+	private Integer id = null;
 	
 	@NotNull
 	@Column(name="quantity")
-	private Integer quantity=null;
+	private Integer quantity = null;
 	
 	@NotNull
 	@Column(name="bill_value")
-	private Double billValue= null;
+	private Double billValue = null;
 	
+	@NotNull
 	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH})
-	private Employee billCheckedBy;
+	private Employee billCheckedBy = null;
 	
 	public Integer getId() {
 		return id;

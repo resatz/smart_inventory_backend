@@ -17,26 +17,26 @@ public class Employee {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+	private Integer id = null;
 	
 	@NotNull
-	private String name;
+	private String name = null;
 	
 	@NotNull
-	private String username;
+	private String username = null;
 	
 	@NotNull
 	@Column(name="password_hash")
-	private String password;
+	private String password = null;
 	
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-	private EmployeeRoles role;
+	private EmployeeRoles role = null;
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
@@ -65,6 +65,7 @@ public class Employee {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+	
 	public EmployeeRoles getRole() {
 		return role;
 	}

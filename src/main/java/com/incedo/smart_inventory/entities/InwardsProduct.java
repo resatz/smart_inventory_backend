@@ -28,7 +28,7 @@ public class InwardsProduct {
 	@Column(name = "supply_date")
 	@JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-	private LocalDate supplyDate;
+	private LocalDate supplyDate = null;
 	
 	@NotNull
 	@Column(name = "receipt_no")
@@ -36,7 +36,7 @@ public class InwardsProduct {
 	
 	@NotNull
 	@ManyToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-	private Supplier supplier;
+	private Supplier supplier = null;
 	
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })

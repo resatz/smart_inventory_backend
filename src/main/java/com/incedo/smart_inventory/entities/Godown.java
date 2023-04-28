@@ -24,24 +24,24 @@ public class Godown {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id= null;
+	private Integer id = null;
 	
 	@NotNull
 	@Column(name="location")
-	private String location;
+	private String location = null;
 	
 	@NotNull
 	@Column(name="capacity_in_quintals")
-	private Double capacityInQuintals= null;
+	private Double capacityInQuintals = null;
 	
 	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-	private Employee manager;
+	private Employee manager = null;
 	
 	@NotNull
 	@Column(name="start_date")
 	@JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-	private LocalDate startDate;
+	private LocalDate startDate = null;
 	
 	public Integer getId() {
 		return id;
@@ -61,7 +61,6 @@ public class Godown {
 	public void setCapacityInQuintals(Double capacityInQuintals) {
 		this.capacityInQuintals = capacityInQuintals;
 	}
-	
 	public Employee getManager() {
 		return manager;
 	}
@@ -78,7 +77,7 @@ public class Godown {
 	@Override
 	public String toString() {
 		return "Godown [id=" + id + ", location=" + location + ", capacityInQuintals=" + capacityInQuintals
-				+ ", employees=" + manager + ", startDate=" + startDate + "]";
+				+ ", manager=" + manager + ", startDate=" + startDate + "]";
 	}
 }
 

@@ -16,7 +16,7 @@ public class Product {
 	
 	@NotNull
 	@Column(name="name")
-	private String name;
+	private String name = null;
 	
 	@NotNull
 	@Column(name="stock")

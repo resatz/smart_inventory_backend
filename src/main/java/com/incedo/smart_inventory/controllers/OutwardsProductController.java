@@ -1,29 +1,22 @@
 package com.incedo.smart_inventory.controllers;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.ConstraintViolationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.incedo.smart_inventory.entities.Godown;
 import com.incedo.smart_inventory.entities.Invoice;
 import com.incedo.smart_inventory.entities.OutwardsProduct;
@@ -33,9 +26,11 @@ import com.incedo.smart_inventory.repositories.InvoiceRepository;
 import com.incedo.smart_inventory.repositories.OutwardsProductRepository;
 import com.incedo.smart_inventory.repositories.ProductRepository;
 
-@ResponseBody
 @RestController
+@RequestMapping("/api")
 public class OutwardsProductController {
+	
+	private static final String PATH = "/outwards";
 	
 	@Autowired
 	OutwardsProductRepository outwardsProductRepository;
@@ -49,12 +44,12 @@ public class OutwardsProductController {
 	@Autowired
 	ProductRepository productRepository;
 	
-	@GetMapping(path="/outwards")
+	@GetMapping(path=PATH)
 	public ResponseEntity<List<OutwardsProduct>> outwardsProduct() {
 		return new ResponseEntity<List<OutwardsProduct>>(outwardsProductRepository.findAll(), HttpStatus.OK);
 	}
 	
-	@GetMapping(path="/outwards/{id}")
+	@GetMapping(path=PATH + "/{id}")
 	public ResponseEntity findById(@PathVariable int id) {
 		Optional<OutwardsProduct> deliveriesFound = outwardsProductRepository.findById(id);
 		
@@ -65,8 +60,8 @@ public class OutwardsProductController {
 		return new ResponseEntity<String>("The outwards with the given id is not found",HttpStatus.NOT_FOUND);
 	}
 	
-	@PostMapping(path="/outwards")
-	public ResponseEntity<String> addProduct(@RequestBody OutwardsProduct outwardsProduct) {
+	@PostMapping(path=PATH)
+	public ResponseEntity addProduct(@RequestBody OutwardsProduct outwardsProduct) {
 		if(outwardsProduct.getSupplyDate() == LocalDate.MIN || outwardsProduct.getDeliveryDate() == LocalDate.MIN) {
 			return new ResponseEntity<String> ("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.",HttpStatus.BAD_REQUEST);
 		}
@@ -101,12 +96,12 @@ public class OutwardsProductController {
 			outwardsProduct.setProduct(godownFound.get());
 		}
 		
-		outwardsProductRepository.save(outwardsProduct);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		OutwardsProduct saved = outwardsProductRepository.save(outwardsProduct);
+		return new ResponseEntity<OutwardsProduct>(saved, HttpStatus.CREATED);
 	}
 	
-	@PutMapping(path="/outwards/{id}")
-	public ResponseEntity<String> editProduct(@PathVariable int id,@RequestBody OutwardsProduct outwardsProduct) {
+	@PutMapping(path=PATH + "/{id}")
+	public ResponseEntity editProduct(@PathVariable int id,@RequestBody OutwardsProduct outwardsProduct) {
 		Optional<OutwardsProduct> outwardsProductFound = outwardsProductRepository.findById(id);
 		
 		if(outwardsProductFound.isEmpty()) {
@@ -149,37 +144,14 @@ public class OutwardsProductController {
 			outwardsProduct.setProduct(productFound.get());
 		}
 		
-		outwardsProductRepository.save(outwardsProduct);
-		return new  ResponseEntity<>(HttpStatus.OK);
+		OutwardsProduct saved = outwardsProductRepository.save(outwardsProduct);
+		return new ResponseEntity<OutwardsProduct>(saved, HttpStatus.OK);
 	}
 	
-	@DeleteMapping(path="/outwards/{id}")
+	@DeleteMapping(path=PATH + "/{id}")
 	public ResponseEntity<Void> deleteEntity(@PathVariable int id) {
 		outwardsProductRepository.deleteById(id);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
-		StringBuffer error = new StringBuffer();
-		ex.getConstraintViolations().forEach(violation -> {
-			error.append(violation.getPropertyPath() + " " + violation.getMessage() + "\n");
-		});
-        return new ResponseEntity<String>(error.toString(), HttpStatus.BAD_REQUEST);
-    }
-	
-	@ExceptionHandler(InvalidFormatException.class)
-    public ResponseEntity<String> handleInvalidFormatException(InvalidFormatException ex) {
-		return new ResponseEntity<String>(String.format("`%s` should be of type %s, but the given value \"%s\" is of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName(), ex.getValue(), ex.getValue().getClass().getSimpleName()), HttpStatus.BAD_REQUEST);
-    }
-	
-	@ExceptionHandler(MismatchedInputException.class)
-    public ResponseEntity<String> handleMismatchedInputException(MismatchedInputException ex) {
-		return new ResponseEntity<String>(String.format("`%s` should be of type %s.", ex.getPath().get(0).getFieldName(), ex.getTargetType().getSimpleName()), HttpStatus.BAD_REQUEST);
-    }
-	
-	@ExceptionHandler(EmptyResultDataAccessException.class)
-    public ResponseEntity<String> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex) {
-		return new ResponseEntity<String>("The resource with given id does not exist.", HttpStatus.BAD_REQUEST);
-    }
 }

@@ -22,40 +22,40 @@ public class OutwardsProduct {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id=null;
+	private Integer id = null;
 	
 	@NotNull
 	@Column(name = "supply_date")
 	@JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-	private LocalDate supplyDate;
+	private LocalDate supplyDate = null;
 	
 	@NotNull
 	@Column(name="delivery_date")
 	@JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-	private LocalDate deliveryDate;
+	private LocalDate deliveryDate = null;
 	
 	@NotNull
 	@Column(name="purpose")
-	private String purpose;
+	private String purpose = null;
 	
 	@NotNull
 	@Column(name="receipt_no")
-	private Integer receiptNo=null;
+	private Integer receiptNo = null;
 	
 	@NotNull
 	@Column(name="delivered_to")
-	private String deliveredTo;
+	private String deliveredTo = null;
 	
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-	private Invoice invoice;
+	private Invoice invoice = null;
 	
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-	private Godown godown;
+	private Godown godown = null;
 	
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-	private Product product;
+	private Product product = null;
 	
 	public Integer getId() {
 		return id;
