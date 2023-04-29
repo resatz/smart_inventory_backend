@@ -16,12 +16,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.incedo.smart_inventory.common.deserializers.LocalDateDeserializer;
 import com.incedo.smart_inventory.common.serializers.LocalDateSerializer;
 
-@Entity
+@Entity(name = "returns_register")
 public class ReturnsProduct {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
 	@Column(name="reason")
@@ -39,26 +39,31 @@ public class ReturnsProduct {
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDate returnDate = null;
 	
+	@NotNull
 	@Column(name="receipt_no")
 	private Integer receiptNo = null;
 	
+	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
 	private Invoice invoice = null;
 	
+	@NotNull
 	@Column(name="returned_by")
 	private String returnedBy = null;
 	
+	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
 	private Product product = null;
 	
+	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
 	private Godown godown = null;
 	
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
 	
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	

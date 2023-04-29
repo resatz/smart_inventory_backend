@@ -17,12 +17,12 @@ import com.incedo.smart_inventory.common.serializers.LocalDateSerializer;
 
 import javax.persistence.Id;
 
-@Entity
+@Entity(name = "outwards_register")
 public class OutwardsProduct {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
 	@Column(name = "supply_date")
@@ -48,19 +48,22 @@ public class OutwardsProduct {
 	@Column(name="delivered_to")
 	private String deliveredTo = null;
 	
+	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
 	private Invoice invoice = null;
 	
+	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
 	private Godown godown = null;
 	
+	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	private Product product = null;
 	
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public LocalDate getSupplyDate() {

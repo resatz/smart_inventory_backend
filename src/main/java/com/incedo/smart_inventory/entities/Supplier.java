@@ -12,16 +12,16 @@ public class Supplier {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
-	@Column(name = "name")
+	@Column(name = "name", unique = true)
 	private String name = null;
 
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public String getName() {

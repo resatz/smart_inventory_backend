@@ -2,6 +2,7 @@ package com.incedo.smart_inventory.common.exception_handlers;
 
 import javax.validation.ConstraintViolationException;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,16 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 @ControllerAdvice(basePackages = "com.incedo.smart_inventory.controllers")
 public class RestExceptionHandler {
+	
+	@ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+		if (ex.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
+			org.hibernate.exception.ConstraintViolationException nestedEx = (org.hibernate.exception.ConstraintViolationException) ex.getCause();
+			return new ResponseEntity<String>(nestedEx.getSQLException().getMessage().split("\n")[1], HttpStatus.BAD_REQUEST);
+		}
+		
+		return new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 	
 	@ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {

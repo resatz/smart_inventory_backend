@@ -14,7 +14,7 @@ public class Invoice {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
 	@Column(name="quantity")
@@ -28,10 +28,10 @@ public class Invoice {
 	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH})
 	private Employee billCheckedBy = null;
 	
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public Integer getQuantity() {

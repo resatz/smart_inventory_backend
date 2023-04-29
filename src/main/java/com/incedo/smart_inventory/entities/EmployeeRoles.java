@@ -13,17 +13,17 @@ public class EmployeeRoles {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name="id")
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
-	@Column(name="role")
+	@Column(name="role", unique = true)
 	private String role = null;
 
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 

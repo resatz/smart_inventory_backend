@@ -17,12 +17,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.incedo.smart_inventory.common.deserializers.LocalDateDeserializer;
 import com.incedo.smart_inventory.common.serializers.LocalDateSerializer;
 
-@Entity
+@Entity(name = "inwards_register")
 public class InwardsProduct {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
 	@Column(name = "supply_date")
@@ -50,10 +50,10 @@ public class InwardsProduct {
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
 	private Product product = null;
 	
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public LocalDate getSupplyDate() {

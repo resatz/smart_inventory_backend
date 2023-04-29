@@ -12,10 +12,10 @@ public class Product {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
-	@Column(name="name")
+	@Column(name="name", unique = true)
 	private String name = null;
 	
 	@NotNull
@@ -26,10 +26,10 @@ public class Product {
 	@Column(name="price")
 	private Double price = null;
 
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public String getName() {

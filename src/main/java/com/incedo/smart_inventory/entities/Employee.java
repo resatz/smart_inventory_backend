@@ -17,26 +17,28 @@ public class Employee {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
 	private String name = null;
 	
 	@NotNull
+	@Column(unique = true)
 	private String username = null;
 	
 	@NotNull
 	@Column(name="password_hash")
 	private String password = null;
 	
+	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
 	private EmployeeRoles role = null;
 
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -76,7 +78,8 @@ public class Employee {
 
 	@Override
 	public String toString() {
-		return "Employees [id=" + id + ", name=" + name + ", username=" + username + ", password=" + password
-				+ ", role=" + role + "]";
+		return "Employee [id=" + id + ", name=" + name + ", username=" + username + ", password=" + password + ", role="
+				+ role + "]";
 	}
+	
 }

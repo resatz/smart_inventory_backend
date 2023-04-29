@@ -114,7 +114,7 @@ public class OutwardsProductController {
 		
 		outwardsProduct.setId(id);
 		
-		if(outwardsProduct.getGodown().getId() != null && outwardsProduct.getGodown().getId() > 0) {
+		if(outwardsProduct.getGodown() != null && outwardsProduct.getGodown().getId() > 0) {
 			Optional<Godown> godownFound = godownRepository.findById(outwardsProduct.getGodown().getId());
 			
 			if(godownFound.isEmpty()) {

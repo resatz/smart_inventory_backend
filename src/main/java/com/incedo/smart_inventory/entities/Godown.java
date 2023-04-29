@@ -9,11 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.incedo.smart_inventory.common.deserializers.LocalDateDeserializer;
@@ -24,7 +23,7 @@ public class Godown {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer id = null;
+	private int id;
 	
 	@NotNull
 	@Column(name="location")
@@ -34,6 +33,7 @@ public class Godown {
 	@Column(name="capacity_in_quintals")
 	private Double capacityInQuintals = null;
 	
+	@NotNull
 	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	private Employee manager = null;
 	
@@ -43,10 +43,10 @@ public class Godown {
     @JsonDeserialize(using = LocalDateDeserializer.class)
 	private LocalDate startDate = null;
 	
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 	public String getLocation() {

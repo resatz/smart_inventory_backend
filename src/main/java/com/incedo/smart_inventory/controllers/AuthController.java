@@ -2,6 +2,7 @@ package com.incedo.smart_inventory.controllers;
 
 import java.util.Optional;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class AuthController {
 			return new ResponseEntity<String>("The username provided does not exist.", HttpStatus.UNAUTHORIZED);
 		}
 		
-		if (!employeeFound.get().getPassword().equals(loginData.getPassword())) {
+		if (!BCrypt.checkpw(loginData.getPassword(), employeeFound.get().getPassword())) {
 			return new ResponseEntity<String>("The password provided is incorrect.", HttpStatus.UNAUTHORIZED);			
 		}
 		
