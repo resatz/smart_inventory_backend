@@ -16,57 +16,57 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Employee;
-import com.incedo.smart_inventory.entities.Invoice;
+import com.incedo.smart_inventory.entities.InvoiceReceived;
 import com.incedo.smart_inventory.repositories.EmployeeRepository;
-import com.incedo.smart_inventory.repositories.InvoiceRepository;
+import com.incedo.smart_inventory.repositories.InvoiceReceivedRepository;
 
 @RestController
 @RequestMapping("/api")
-public class InvoiceController {
+public class InvoiceReceivedController {
 	
 	private static final String PATH = "/invoice";
 	
 	@Autowired
-	InvoiceRepository invoiceRespository;
+	InvoiceReceivedRepository invoiceReceivedRepository;
 	
 	@Autowired
 	EmployeeRepository employeeRepository;
 	
 	@GetMapping(path=PATH)
-	public ResponseEntity<List<Invoice>> invoice() {
-		return ResponseEntity.ok(invoiceRespository.findAll());
+	public ResponseEntity<List<InvoiceReceived>> invoiceReceived() {
+		return ResponseEntity.ok(invoiceReceivedRepository.findAll());
 	}
 	
 	@GetMapping(path=PATH + "/{id}")
 	public ResponseEntity findById(@PathVariable int id) {
-		Optional<Invoice> invoiceFound = invoiceRespository.findById(id);
+		Optional<InvoiceReceived> invoiceFound = invoiceReceivedRepository.findById(id);
 		
 		if(invoiceFound.isPresent()) {
-			return new ResponseEntity<Invoice>(invoiceFound.get(), HttpStatus.OK);
+			return new ResponseEntity<InvoiceReceived>(invoiceFound.get(), HttpStatus.OK);
 		}
 		
 		return new ResponseEntity<String>("The resource with given id doesn't exist", HttpStatus.NOT_FOUND);
 	}
 	
 	@PostMapping(path=PATH)
-	public ResponseEntity addInvoice(@RequestBody Invoice invoice) {
+	public ResponseEntity addInvoice(@RequestBody InvoiceReceived invoiceReceived) {
 		
-		if(invoice.getBillCheckedBy()!=null && invoice.getBillCheckedBy().getId()>0) {
-			Optional<Employee> employeeFound = employeeRepository.findById(invoice.getBillCheckedBy().getId());
+		if(invoiceReceived.getBillCheckedBy()!=null && invoiceReceived.getBillCheckedBy().getId()>0) {
+			Optional<Employee> employeeFound = employeeRepository.findById(invoiceReceived.getBillCheckedBy().getId());
 			
 			if(employeeFound.isEmpty()) {
 				return new ResponseEntity<String>("The employee with the given id is not found",HttpStatus.NOT_FOUND);
 			}
-			invoice.setBillCheckedBy(employeeFound.get());
+			invoiceReceived.setBillCheckedBy(employeeFound.get());
 		}
 			
-		Invoice saved = invoiceRespository.save(invoice);
-		return new ResponseEntity<Invoice>(saved, HttpStatus.CREATED);
+		InvoiceReceived saved = invoiceReceivedRepository.save(invoiceReceived);
+		return new ResponseEntity<InvoiceReceived>(saved, HttpStatus.CREATED);
 	}
 	
 	@DeleteMapping(path=PATH + "/{id}")
 	public ResponseEntity<Void> deleteEntity(@PathVariable int id) {
-		invoiceRespository.deleteById(id);
+		invoiceReceivedRepository.deleteById(id);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	

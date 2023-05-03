@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Godown;
-import com.incedo.smart_inventory.entities.Invoice;
+import com.incedo.smart_inventory.entities.InvoiceIssued;
 import com.incedo.smart_inventory.entities.OutwardsProduct;
 import com.incedo.smart_inventory.entities.Product;
 import com.incedo.smart_inventory.repositories.GodownRepository;
-import com.incedo.smart_inventory.repositories.InvoiceRepository;
+import com.incedo.smart_inventory.repositories.InvoiceIssuedRepository;
 import com.incedo.smart_inventory.repositories.OutwardsProductRepository;
 import com.incedo.smart_inventory.repositories.ProductRepository;
 
@@ -39,7 +39,7 @@ public class OutwardsProductController {
 	GodownRepository godownRepository;
 	
 	@Autowired
-	InvoiceRepository invoiceRepository;
+	InvoiceIssuedRepository invoiceIssuedRepository;
 	
 	@Autowired
 	ProductRepository productRepository;
@@ -76,25 +76,25 @@ public class OutwardsProductController {
 			outwardsProduct.setGodown(godownFound.get());
 		}
 		
-		if(outwardsProduct.getInvoice()!= null && outwardsProduct.getInvoice().getId() > 0) {
-			Optional <Invoice> invoiceFound = invoiceRepository.findById(outwardsProduct.getInvoice().getId());
+		if(outwardsProduct.getInvoiceIssued()!= null && outwardsProduct.getInvoiceIssued().getId() > 0) {
+			Optional <InvoiceIssued> invoiceIssuedFound = invoiceIssuedRepository.findById(outwardsProduct.getInvoiceIssued().getId());
 			
-			if(invoiceFound.isEmpty()) {
+			if(invoiceIssuedFound.isEmpty()) {
 				return new ResponseEntity<String>("invoice with the given id is not found.", HttpStatus.NOT_FOUND);
 			}
 			
-			outwardsProduct.setInvoice(invoiceFound.get());
+			outwardsProduct.setInvoiceIssued(invoiceIssuedFound.get());
 		}
 		
-		if(outwardsProduct.getProduct() != null && outwardsProduct.getProduct().getId() > 0) {
-			Optional<Product> godownFound = productRepository.findById(outwardsProduct.getProduct().getId());
-			
-			if(godownFound.isEmpty()) {
-				return new ResponseEntity<String>("Product with the given id is not found.", HttpStatus.NOT_FOUND);
-			}
-			
-			outwardsProduct.setProduct(godownFound.get());
-		}
+//		if(outwardsProduct.getProduct() != null && outwardsProduct.getProduct().getId() > 0) {
+//			Optional<Product> godownFound = productRepository.findById(outwardsProduct.getProduct().getId());
+//			
+//			if(godownFound.isEmpty()) {
+//				return new ResponseEntity<String>("Product with the given id is not found.", HttpStatus.NOT_FOUND);
+//			}
+//			
+//			outwardsProduct.setProduct(godownFound.get());
+//		}
 		
 		OutwardsProduct saved = outwardsProductRepository.save(outwardsProduct);
 		return new ResponseEntity<OutwardsProduct>(saved, HttpStatus.CREATED);
@@ -124,25 +124,25 @@ public class OutwardsProductController {
 			outwardsProduct.setGodown(godownFound.get());
 		}
 		
-		if(outwardsProduct.getInvoice()!= null && outwardsProduct.getInvoice().getId() > 0) {
-			Optional <Invoice> invoiceFound = invoiceRepository.findById(outwardsProduct.getInvoice().getId());
+		if(outwardsProduct.getInvoiceIssued()!= null && outwardsProduct.getInvoiceIssued().getId() > 0) {
+			Optional <InvoiceIssued> invoiceFound = invoiceIssuedRepository.findById(outwardsProduct.getInvoiceIssued().getId());
 			
 			if(invoiceFound.isEmpty()) {
 				return new ResponseEntity<String>("invoice with the given id is not found.", HttpStatus.NOT_FOUND);
 			}
 			
-			outwardsProduct.setInvoice(invoiceFound.get());
+			outwardsProduct.setInvoiceIssued(invoiceFound.get());
 		}
 		
-		if(outwardsProduct.getProduct() != null && outwardsProduct.getProduct().getId() > 0) {
-			Optional<Product> productFound = productRepository.findById(outwardsProduct.getProduct().getId());
-			
-			if(productFound.isEmpty()) {
-				return new ResponseEntity<String>("Product with the given id is not found.", HttpStatus.NOT_FOUND);
-			}
-			
-			outwardsProduct.setProduct(productFound.get());
-		}
+//		if(outwardsProduct.getProduct() != null && outwardsProduct.getProduct().getId() > 0) {
+//			Optional<Product> productFound = productRepository.findById(outwardsProduct.getProduct().getId());
+//			
+//			if(productFound.isEmpty()) {
+//				return new ResponseEntity<String>("Product with the given id is not found.", HttpStatus.NOT_FOUND);
+//			}
+//			
+//			outwardsProduct.setProduct(productFound.get());
+//		}
 		
 		OutwardsProduct saved = outwardsProductRepository.save(outwardsProduct);
 		return new ResponseEntity<OutwardsProduct>(saved, HttpStatus.OK);

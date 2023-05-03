@@ -1,6 +1,7 @@
 package com.incedo.smart_inventory.entities;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -16,6 +17,7 @@ import com.incedo.smart_inventory.common.deserializers.LocalDateDeserializer;
 import com.incedo.smart_inventory.common.serializers.LocalDateSerializer;
 
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity(name = "outwards_register")
 public class OutwardsProduct {
@@ -50,15 +52,15 @@ public class OutwardsProduct {
 	
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-	private Invoice invoice = null;
+	private InvoiceIssued invoiceIssued = null;
 	
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
 	private Godown godown = null;
 	
 	@NotNull
-	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-	private Product product = null;
+	@OneToMany(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private List<ProductsMap> products = null;
 	
 	public int getId() {
 		return id;
@@ -97,11 +99,11 @@ public class OutwardsProduct {
 		this.deliveredTo = deliveredTo;
 	}
 	
-	public Invoice getInvoice() {
-		return invoice;
+	public InvoiceIssued getInvoiceIssued() {
+		return invoiceIssued;
 	}
-	public void setInvoice(Invoice invoice) {
-		this.invoice = invoice;
+	public void setInvoiceIssued(InvoiceIssued invoiceIssued) {
+		this.invoiceIssued = invoiceIssued;
 	}
 	public Godown getGodown() {
 		return godown;
@@ -110,17 +112,17 @@ public class OutwardsProduct {
 		this.godown = godown;
 	}
 	
-	public Product getProduct() {
-		return product;
+	public List<ProductsMap> getProducts() {
+		return products;
 	}
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setProductsMap(List<ProductsMap> products) {
+		this.products = products;
 	}
 	
 	@Override
 	public String toString() {
 		return "OutwardsProduct [id=" + id + ", supplyDate=" + supplyDate + ", deliveryDate=" + deliveryDate
 				+ ", purpose=" + purpose + ", receiptNo=" + receiptNo + ", deliveredTo=" + deliveredTo
-				+ ", invoice=" + invoice + ", godown=" + godown + ", product=" + product + "]";
+				+ ", invoiceIssued=" + invoiceIssued + ", godown=" + godown + ", products=" + products + "]";
 	}
 }

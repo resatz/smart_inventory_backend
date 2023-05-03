@@ -1,6 +1,7 @@
 package com.incedo.smart_inventory.entities;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
@@ -40,15 +42,15 @@ public class InwardsProduct {
 	
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-	private Invoice invoice = null;
+	private InvoiceReceived invoiceReceived = null;
 	
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
 	private Godown godown = null;
 	
 	@NotNull
-	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
-	private Product product = null;
+	@OneToMany(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
+	private List<ProductsMap> products = null;
 	
 	public int getId() {
 		return id;
@@ -74,11 +76,11 @@ public class InwardsProduct {
 	public void setSupplier(Supplier supplier) {
 		this.supplier = supplier;
 	}
-	public Invoice getInvoice() {
-		return invoice;
+	public InvoiceReceived getInvoiceReceived() {
+		return invoiceReceived;
 	}
-	public void setInvoice(Invoice invoice) {
-		this.invoice = invoice;
+	public void setInvoice(InvoiceReceived invoiceReceived) {
+		this.invoiceReceived = invoiceReceived;
 	}
 	public Godown getGodown() {
 		return godown;
@@ -86,18 +88,19 @@ public class InwardsProduct {
 	public void setGodown(Godown godown) {
 		this.godown = godown;
 	}
-	public Product getProduct() {
-		return product;
+	public List<ProductsMap> getProducts() {
+		return products;
 	}
-	public void setProduct(Product product) {
-		this.product = product;
+	public void setProducts(List<ProductsMap> products) {
+		this.products = products;
 	}
-
+	
 	@Override
 	public String toString() {
-		return "InwardsProduct [id=" + id + ", supplyDate=" + supplyDate + ", receiptNo=" + receiptNo
-				+ ", supplier=" + supplier + ", invoice=" + invoice + ", godown=" + godown
-				+ ", product=" + product + "]";
-	}	
+		return "InwardsProduct [id=" + id + ", supplyDate=" + supplyDate + ", receiptNo=" + receiptNo + ", supplier="
+				+ supplier + ", invoiceReceived=" + invoiceReceived + ", godown=" + godown + ", products=" + products
+				+ "]";
+	}
+
 	
 }

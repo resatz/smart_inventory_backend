@@ -19,8 +19,8 @@ public class Product {
 	private String name = null;
 	
 	@NotNull
-	@Column(name="stock")
-	private Integer stock = null;
+	@Column(name="weight")
+	private Float weight = null;
 	
 	@NotNull
 	@Column(name="price")
@@ -38,11 +38,11 @@ public class Product {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Integer getStock() {
-		return stock;
+	public Float getWeight() {
+		return weight;
 	}
-	public void setStock(Integer stock) {
-		this.stock = stock;
+	public void setStock(Float weight) {
+		this.weight = weight;
 	}
 	public Double getPrice() {
 		return price;
@@ -53,7 +53,7 @@ public class Product {
 
 	@Override
 	public String toString() {
-		return "Products [id=" + id + ", name=" + name + ", stock=" + stock + ", price=" + price + "]";
+		return "Products [id=" + id + ", name=" + name + ", weight=" + weight + ", price=" + price + "]";
 	}
 	
 }

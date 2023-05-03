@@ -1,6 +1,7 @@
 package com.incedo.smart_inventory.entities;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -8,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
@@ -44,16 +46,16 @@ public class ReturnsProduct {
 	private Integer receiptNo = null;
 	
 	@NotNull
-	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-	private Invoice invoice = null;
-	
-	@NotNull
 	@Column(name="returned_by")
 	private String returnedBy = null;
 	
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
-	private Product product = null;
+	private InvoiceIssued invoiceIssued = null;
+	
+	@NotNull
+	@OneToMany(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
+	private List<ProductsMap> products = null;
 	
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
@@ -99,14 +101,6 @@ public class ReturnsProduct {
 		this.receiptNo = receiptNo;
 	}
 	
-	public Invoice getInvoice() {
-		return invoice;
-	}
-	
-	public void setInvoice(Invoice invoice) {
-		this.invoice = invoice;
-	}
-	
 	public String getReturnedBy() {
 		return returnedBy;
 	}
@@ -115,14 +109,22 @@ public class ReturnsProduct {
 		this.returnedBy = returnedBy;
 	}
 	
-	public Product getProduct() {
-		return product;
+	public InvoiceIssued getInvoiceIssued() {
+		return invoiceIssued;
 	}
-	
-	public void setProduct(Product product) {
-		this.product = product;
+
+	public void setInvoiceIssued(InvoiceIssued invoiceIssued) {
+		this.invoiceIssued = invoiceIssued;
 	}
-	
+
+	public List<ProductsMap> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<ProductsMap> products) {
+		this.products = products;
+	}
+
 	public Godown getGodown() {
 		return godown;
 	}
@@ -130,12 +132,12 @@ public class ReturnsProduct {
 	public void setGodown(Godown godown) {
 		this.godown = godown;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Returns [id=" + id + ", reason=" + reason + ", deliveryDate=" + deliveryDate + ", returnDate=" + returnDate
-				+ ", receiptNo=" + receiptNo + ", invoice=" + invoice + ", returnedBy=" + returnedBy + ", product="
-				+ product + ", godown=" + godown + "]";
+		return "ReturnsProduct [id=" + id + ", reason=" + reason + ", deliveryDate=" + deliveryDate + ", returnDate="
+				+ returnDate + ", receiptNo=" + receiptNo + ", returnedBy=" + returnedBy + ", invoiceIssued="
+				+ invoiceIssued + ", products=" + products + ", godown=" + godown + "]";
 	}
-
+	
 }

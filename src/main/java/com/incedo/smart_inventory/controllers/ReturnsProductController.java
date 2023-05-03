@@ -17,12 +17,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Godown;
-import com.incedo.smart_inventory.entities.Invoice;
+import com.incedo.smart_inventory.entities.InvoiceIssued;
+import com.incedo.smart_inventory.entities.InvoiceReceived;
 import com.incedo.smart_inventory.entities.Product;
+import com.incedo.smart_inventory.entities.ProductsMap;
 import com.incedo.smart_inventory.entities.ReturnsProduct;
 import com.incedo.smart_inventory.repositories.GodownRepository;
-import com.incedo.smart_inventory.repositories.InvoiceRepository;
+import com.incedo.smart_inventory.repositories.InvoiceIssuedRepository;
+import com.incedo.smart_inventory.repositories.InvoiceReceivedRepository;
 import com.incedo.smart_inventory.repositories.ProductRepository;
+import com.incedo.smart_inventory.repositories.ProductsMapReposirory;
 import com.incedo.smart_inventory.repositories.ReturnsProductRepository;
 
 @RestController
@@ -35,13 +39,13 @@ public class ReturnsProductController {
 	ReturnsProductRepository returnsProductRepository;
 	
 	@Autowired
-	ProductRepository productRepository;
+	ProductsMapReposirory productsMapRepository;
 	
 	@Autowired
 	GodownRepository godownRepository;
 	
 	@Autowired
-	InvoiceRepository invoiceRepository;
+	InvoiceIssuedRepository invoiceIssuedRepository;
 
 	@GetMapping(path=PATH)
 	public List<ReturnsProduct> fetchAllReservations(){
@@ -73,24 +77,24 @@ public class ReturnsProductController {
 		
 		returnsProduct.setId(id);
 		
-		if (returnsProduct.getInvoice() != null && returnsProduct.getInvoice().getId() > 0) {
-			Optional<Invoice> invoiceFound = invoiceRepository.findById(returnsProduct.getInvoice().getId());
+		if (returnsProduct.getInvoiceIssued() != null && returnsProduct.getInvoiceIssued().getId() > 0) {
+			Optional<InvoiceIssued> invoiceIssuedFound = invoiceIssuedRepository.findById(returnsProduct.getInvoiceIssued().getId());
 			
-			if (invoiceFound.isEmpty()) {
+			if (invoiceIssuedFound.isEmpty()) {
 				return new ResponseEntity<String>("Invoice with the given id not found.", HttpStatus.NOT_FOUND);
 			}
 			
-			returnsProduct.setInvoice(invoiceFound.get());
+			returnsProduct.setInvoiceIssued(invoiceIssuedFound.get());
 		}
 		
-		if (returnsProduct.getProduct() != null && returnsProduct.getProduct().getId() > 0) {
-			Optional<Product> productFound = productRepository.findById(returnsProduct.getProduct().getId());
-			
-			if (productFound.isEmpty()) {
-				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
-			}
-			returnsProduct.setProduct(productFound.get());
-		}
+//		if (returnsProduct.getProducts() != null && returnsProduct.getProducts().getId() > 0) {
+//			Optional<ProductsMap> productMapFound = productsMapRepository.findById(returnsProduct.getProducts().getId());
+//			
+//			if (productMapFound.isEmpty()) {
+//				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
+//			}
+//			returnsProduct.setProducts(productMapFound.get());
+//		}
 		if (returnsProduct.getGodown() != null && returnsProduct.getGodown().getId() > 0) {
 			Optional<Godown> godownFound = godownRepository.findById(returnsProduct.getGodown().getId());
 			
@@ -110,23 +114,23 @@ public class ReturnsProductController {
 			return new ResponseEntity<String> ("Date should be given in the format dd/MM/yyyy. For example, 30th December 2000 should be given as 30/12/2000.",HttpStatus.BAD_REQUEST);
 		}
 		
-		if (returnsProduct.getInvoice() != null && returnsProduct.getInvoice().getId() > 0) {
-			Optional<Invoice> invoiceFound = invoiceRepository.findById(returnsProduct.getInvoice().getId());
+		if (returnsProduct.getInvoiceIssued() != null && returnsProduct.getInvoiceIssued().getId() > 0) {
+			Optional<InvoiceIssued> invoiceIssuedFound = invoiceIssuedRepository.findById(returnsProduct.getInvoiceIssued().getId());
 			
-			if (invoiceFound.isEmpty()) {
+			if (invoiceIssuedFound.isEmpty()) {
 				return new ResponseEntity<String>("Invoice with the given id not found.", HttpStatus.NOT_FOUND);
 			}
-			returnsProduct.setInvoice(invoiceFound.get());
+			returnsProduct.setInvoiceIssued(invoiceIssuedFound.get());
 		}
 		
-		if (returnsProduct.getProduct() != null && returnsProduct.getProduct().getId() > 0) {
-			Optional<Product> productFound = productRepository.findById(returnsProduct.getProduct().getId());
-			
-			if (productFound.isEmpty()) {
-				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
-			}
-			returnsProduct.setProduct(productFound.get());
-		}
+//		if (returnsProduct.getProducts() != null && returnsProduct.getProducts().getId() > 0) {
+//			Optional<ProductsMap> productMapFound = productsMapRepository.findById(returnsProduct.getProducts().getId());
+//			
+//			if (productMapFound.isEmpty()) {
+//				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
+//			}
+//			returnsProduct.setProducts(productMapFound.get());
+//		}
 		
 		if (returnsProduct.getGodown() != null && returnsProduct.getGodown().getId() > 0) {
 			Optional<Godown> godownFound = godownRepository.findById(returnsProduct.getGodown().getId());
