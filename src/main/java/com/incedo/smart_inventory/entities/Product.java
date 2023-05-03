@@ -7,7 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
-@Entity
+@Entity(name="products")
 public class Product {
 	
 	@Id
@@ -19,12 +19,12 @@ public class Product {
 	private String name = null;
 	
 	@NotNull
-	@Column(name="weight")
-	private Float weight = null;
-	
-	@NotNull
 	@Column(name="price")
 	private Double price = null;
+	
+	@NotNull
+	@Column(name="weight")
+	private Float weight = null;
 
 	public int getId() {
 		return id;
@@ -41,7 +41,7 @@ public class Product {
 	public Float getWeight() {
 		return weight;
 	}
-	public void setStock(Float weight) {
+	public void setWeight(Float weight) {
 		this.weight = weight;
 	}
 	public Double getPrice() {
@@ -50,10 +50,11 @@ public class Product {
 	public void setPrice(Double price) {
 		this.price = price;
 	}
-
 	@Override
 	public String toString() {
 		return "Products [id=" + id + ", name=" + name + ", weight=" + weight + ", price=" + price + "]";
 	}
+
+	
 	
 }
