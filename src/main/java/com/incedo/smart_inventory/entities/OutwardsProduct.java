@@ -1,29 +1,29 @@
 package com.incedo.smart_inventory.entities;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.incedo.smart_inventory.common.deserializers.LocalDateDeserializer;
 import com.incedo.smart_inventory.common.serializers.LocalDateSerializer;
 
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
 @Entity(name = "outwards_register")
 public class OutwardsProduct {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	
 	@NotNull
@@ -43,7 +43,7 @@ public class OutwardsProduct {
 	private String purpose = null;
 	
 	@NotNull
-	@Column(name="receipt_no")
+	@Column(name="receipt_no", unique = true)
 	private Integer receiptNo = null;
 	
 	@NotNull
@@ -51,7 +51,10 @@ public class OutwardsProduct {
 	private String deliveredTo = null;
 	
 	@NotNull
-	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
+	@JsonProperty(value = "invoice")
+	@JsonIgnoreProperties(value = { "product", "quantity" })
+	@JoinColumn(name = "invoice_id", unique = true)
+	@OneToOne(cascade = CascadeType.ALL)
 	private InvoiceIssued invoiceIssued = null;
 	
 	@NotNull
@@ -59,8 +62,12 @@ public class OutwardsProduct {
 	private Godown godown = null;
 	
 	@NotNull
-	@OneToMany(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-	private List<ProductsMap> products = null;
+	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE,CascadeType.PERSIST,CascadeType.REFRESH})
+	private Product product = null;
+	
+	@NotNull
+	@Column(name="quantity")
+	private Integer quantity = null;
 	
 	public int getId() {
 		return id;
@@ -98,7 +105,6 @@ public class OutwardsProduct {
 	public void setDeliveredTo(String deliveredTo) {
 		this.deliveredTo = deliveredTo;
 	}
-	
 	public InvoiceIssued getInvoiceIssued() {
 		return invoiceIssued;
 	}
@@ -111,18 +117,23 @@ public class OutwardsProduct {
 	public void setGodown(Godown godown) {
 		this.godown = godown;
 	}
-	
-	public List<ProductsMap> getProducts() {
-		return products;
+	public Product getProduct() {
+		return product;
 	}
-	public void setProductsMap(List<ProductsMap> products) {
-		this.products = products;
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	public Integer getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
 	}
 	
 	@Override
 	public String toString() {
 		return "OutwardsProduct [id=" + id + ", supplyDate=" + supplyDate + ", deliveryDate=" + deliveryDate
 				+ ", purpose=" + purpose + ", receiptNo=" + receiptNo + ", deliveredTo=" + deliveredTo
-				+ ", invoiceIssued=" + invoiceIssued + ", godown=" + godown + ", products=" + products + "]";
+				+ ", invoiceIssued=" + invoiceIssued + ", godown=" + godown + ", product=" + product + ", quantity=" + quantity + "]";
 	}
 }

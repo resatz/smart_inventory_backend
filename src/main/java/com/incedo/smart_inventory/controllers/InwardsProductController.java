@@ -4,14 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.ConstraintViolationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,17 +16,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.Godown;
 import com.incedo.smart_inventory.entities.InvoiceReceived;
 import com.incedo.smart_inventory.entities.InwardsProduct;
 import com.incedo.smart_inventory.entities.Product;
+import com.incedo.smart_inventory.entities.ProductsStock;
+import com.incedo.smart_inventory.entities.ProductsStockCompositeKey;
 import com.incedo.smart_inventory.entities.Supplier;
+import com.incedo.smart_inventory.repositories.EmployeeRepository;
 import com.incedo.smart_inventory.repositories.GodownRepository;
 import com.incedo.smart_inventory.repositories.InvoiceReceivedRepository;
 import com.incedo.smart_inventory.repositories.InwardsProductRepository;
 import com.incedo.smart_inventory.repositories.ProductRepository;
+import com.incedo.smart_inventory.repositories.ProductsStockRepository;
 import com.incedo.smart_inventory.repositories.SupplierRepository;
 
 @RestController
@@ -53,6 +52,12 @@ public class InwardsProductController {
 	
 	@Autowired
 	ProductRepository productRepository;
+	
+	@Autowired
+	EmployeeRepository employeeRepository;
+	
+	@Autowired
+	ProductsStockRepository productsStockRepository;
 	
 	@GetMapping(path=PATH)
 	public ResponseEntity<List<InwardsProduct>> getProducts() {
@@ -86,14 +91,18 @@ public class InwardsProductController {
 			inwardsProduct.setSupplier(supplierFound.get());
 		}
 		
-		if (inwardsProduct.getInvoiceReceived() != null && inwardsProduct.getInvoiceReceived().getId() > 0) {
-			Optional<InvoiceReceived> invoiceFound = invoiceReceivedRepository.findById(inwardsProduct.getInvoiceReceived().getId());
-			
-			if (invoiceFound.isEmpty()) {
-				return new ResponseEntity<String>("Invoice with the given id not found.", HttpStatus.NOT_FOUND);
+		if (inwardsProduct.getInvoiceReceived() != null) {
+			if (inwardsProduct.getInvoiceReceived().getBillCheckedBy() != null && inwardsProduct.getInvoiceReceived().getBillCheckedBy().getId() > 0) {
+				Optional<Employee> employeeFound = employeeRepository.findById(inwardsProduct.getInvoiceReceived().getBillCheckedBy().getId());
+				
+				if (employeeFound.isEmpty()) {
+					return new ResponseEntity<String>("Employee with the given id not found.", HttpStatus.NOT_FOUND);
+				}
+				
+				inwardsProduct.getInvoiceReceived().setBillCheckedBy(employeeFound.get());
 			}
 			
-			inwardsProduct.setInvoice(invoiceFound.get());
+			inwardsProduct.getInvoiceReceived().setQuantity(inwardsProduct.getQuantity());
 		}
 		
 		if (inwardsProduct.getGodown() != null && inwardsProduct.getGodown().getId() > 0) {
@@ -106,17 +115,40 @@ public class InwardsProductController {
 			inwardsProduct.setGodown(godownFound.get());
 		}
 		
-//		if (inwardsProduct.getProduct() != null && inwardsProduct.getProduct().getId() > 0) {
-//			Optional<Product> productFound = productRepository.findById(inwardsProduct.getProduct().getId());
-//			
-//			if (productFound.isEmpty()) {
-//				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
-//			}
-//			
-//			inwardsProduct.setProduct(productFound.get());
-//		}
+		if (inwardsProduct.getProduct() != null && inwardsProduct.getProduct().getId() > 0) {
+			Optional<Product> productFound = productRepository.findById(inwardsProduct.getProduct().getId());
+			
+			if (productFound.isEmpty()) {
+				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
+			}
+			
+			inwardsProduct.setProduct(productFound.get());
+			
+			if (inwardsProduct.getInvoiceReceived() != null) {
+				inwardsProduct.getInvoiceReceived().setProduct(productFound.get());
+				if (inwardsProduct.getQuantity() != null) {
+					inwardsProduct.getInvoiceReceived().setBillValue(productFound.get().getPrice() * inwardsProduct.getQuantity());
+				}
+			}
+		}
 		
 		InwardsProduct saved = inwardsProductRepository.save(inwardsProduct);
+		
+//		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(inwardsProduct.getProduct().getId(), inwardsProduct.getGodown().getId());
+//		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+//		if (productsStockFound.isPresent()) {
+//			productsStockFound.get().setStock(productsStockFound.get().getStock() + inwardsProduct.getQuantity());
+//			productsStockRepository.save(productsStockFound.get());
+//		}
+//		else {
+//			ProductsStock productsStock = new ProductsStock();
+//			productsStock.setCompositeKey(productsStockCompositeKey);
+//			productsStock.setProduct(inwardsProduct.getProduct());
+//			productsStock.setGodown(inwardsProduct.getGodown());
+//			productsStock.setStock(inwardsProduct.getQuantity());
+//			productsStockRepository.save(productsStock);
+//		}
+		
 		return new ResponseEntity<InwardsProduct>(saved, HttpStatus.CREATED);
 	}
 	
@@ -151,7 +183,20 @@ public class InwardsProductController {
 				return new ResponseEntity<String>("Invoice with the given id not found.", HttpStatus.NOT_FOUND);
 			}
 			
-			inwardsProduct.setInvoice(invoiceFound.get());
+			inwardsProduct.setInvoiceReceived(invoiceFound.get());
+		}
+		else if (inwardsProduct.getInvoiceReceived() != null) {
+			if(inwardsProduct.getInvoiceReceived().getBillCheckedBy() != null && inwardsProduct.getInvoiceReceived().getBillCheckedBy().getId() > 0) {
+				Optional<Employee> employeeFound = employeeRepository.findById(inwardsProduct.getInvoiceReceived().getBillCheckedBy().getId());
+				
+				if (employeeFound.isEmpty()) {
+					return new ResponseEntity<String>("Employee with the given id not found.", HttpStatus.NOT_FOUND);
+				}
+				
+				inwardsProduct.getInvoiceReceived().setBillCheckedBy(employeeFound.get());
+			}
+			
+			inwardsProduct.getInvoiceReceived().setQuantity(inwardsProduct.getQuantity());
 		}
 		
 		if (inwardsProduct.getGodown() != null && inwardsProduct.getGodown().getId() > 0) {
@@ -164,23 +209,76 @@ public class InwardsProductController {
 			inwardsProduct.setGodown(godownFound.get());
 		}
 		
-//		if (inwardsProduct.getProduct() != null && inwardsProduct.getProduct().getId() > 0) {
-//			Optional<Product> productFound = productRepository.findById(inwardsProduct.getProduct().getId());
-//			
-//			if (productFound.isEmpty()) {
-//				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
-//			}
-//			
-//			inwardsProduct.setProduct(productFound.get());
-//		}
+		if (inwardsProduct.getProduct() != null && inwardsProduct.getProduct().getId() > 0) {
+			Optional<Product> productFound = productRepository.findById(inwardsProduct.getProduct().getId());
+			
+			if (productFound.isEmpty()) {
+				return new ResponseEntity<String>("Product with the given id not found.", HttpStatus.NOT_FOUND);
+			}
+			
+			inwardsProduct.setProduct(productFound.get());
+			
+			if (inwardsProduct.getInvoiceReceived() != null) {
+				inwardsProduct.getInvoiceReceived().setProduct(productFound.get());
+				if (inwardsProduct.getQuantity() != null) {
+					inwardsProduct.getInvoiceReceived().setBillValue(productFound.get().getPrice() * inwardsProduct.getQuantity());
+				}
+			}
+		}
+		
+		Integer previousQuantity = inwardsProductFound.get().getQuantity();
+		Product previousProduct = inwardsProductFound.get().getProduct();
+		Godown previousGodown = inwardsProductFound.get().getGodown();
 		
 		InwardsProduct saved = inwardsProductRepository.save(inwardsProduct);
+		
+//		System.out.println(inwardsProduct.getQuantity() + " " + previousQuantity);
+//		System.out.println(inwardsProduct.getProduct().getId() + " " + previousProduct.getId());
+//		System.out.println(inwardsProduct.getGodown().getId() + " " + previousGodown.getId());
+//		if (inwardsProduct.getQuantity() != previousQuantity || inwardsProduct.getProduct().getId() != previousProduct.getId() || inwardsProduct.getGodown().getId() != previousGodown.getId()) {
+//			ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(previousProduct.getId(), previousGodown.getId());
+//			Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+//			if (productsStockFound.isPresent()) {
+//				productsStockFound.get().setStock(productsStockFound.get().getStock() - previousQuantity);
+//				productsStockRepository.save(productsStockFound.get());
+//			}
+//			
+//			productsStockCompositeKey = new ProductsStockCompositeKey(inwardsProduct.getProduct().getId(), inwardsProduct.getGodown().getId());
+//			productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+//			if (productsStockFound.isPresent()) {
+//				productsStockFound.get().setStock(productsStockFound.get().getStock() + inwardsProduct.getQuantity());
+//				productsStockRepository.save(productsStockFound.get());
+//			}
+//			else {
+//				ProductsStock productsStock = new ProductsStock();
+//				productsStock.setCompositeKey(productsStockCompositeKey);
+//				productsStock.setProduct(inwardsProduct.getProduct());
+//				productsStock.setGodown(inwardsProduct.getGodown());
+//				productsStock.setStock(inwardsProduct.getQuantity());
+//				productsStockRepository.save(productsStock);
+//			}
+//		}
+		
 		return new ResponseEntity<InwardsProduct>(saved, HttpStatus.OK);
 	}
 	
 	@DeleteMapping(path=PATH + "/{id}")
-	public ResponseEntity<Void> deleteProduct(@PathVariable int id) {
+	public ResponseEntity<String> deleteProduct(@PathVariable int id) {
+		Optional<InwardsProduct> inwardsProductFound = inwardsProductRepository.findById(id);
+		
+		if (inwardsProductFound.isEmpty()) {
+			return new ResponseEntity<String>("Record with the given id not found.", HttpStatus.NOT_FOUND);
+		}
+		
 		inwardsProductRepository.deleteById(id);
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		
+		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(inwardsProductFound.get().getProduct().getId(), inwardsProductFound.get().getGodown().getId());
+		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+		if (productsStockFound.isPresent()) {
+			productsStockFound.get().setStock(productsStockFound.get().getStock() - inwardsProductFound.get().getQuantity());
+			productsStockRepository.save(productsStockFound.get());
+		}
+		
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 }

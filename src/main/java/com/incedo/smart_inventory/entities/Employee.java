@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -16,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Employee {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	
 	@NotNull
@@ -33,6 +34,9 @@ public class Employee {
 	@NotNull
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
 	private EmployeeRoles role = null;
+	
+	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
+	private Godown godown = null;
 
 	public int getId() {
 		return id;
@@ -74,6 +78,14 @@ public class Employee {
 
 	public void setRole(EmployeeRoles role) {
 		this.role = role;
+	}
+	
+	public Godown getGodown() {
+		return godown;
+	}
+
+	public void setGodown(Godown godown) {
+		this.godown = godown;
 	}
 
 	@Override

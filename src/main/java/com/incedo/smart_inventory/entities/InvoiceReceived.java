@@ -1,14 +1,11 @@
 package com.incedo.smart_inventory.entities;
 
-import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
@@ -16,12 +13,12 @@ import javax.validation.constraints.NotNull;
 public class InvoiceReceived {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	
 	@NotNull
-	@Column(name="invoice_no")
-	private Integer invoiceNo = null;
+	@Column(name="invoice_no", unique = true)
+	private String invoiceNo = null;
 	
 	@NotNull
 	@Column(name="bill_value")
@@ -32,8 +29,12 @@ public class InvoiceReceived {
 	private Employee billCheckedBy = null;
 	
 	@NotNull
-	@OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-	private List<ProductsMap> productsMap = null;
+	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private Product product = null;
+	
+	@NotNull
+	@Column(name="quantity")
+	private Integer quantity = null;
 
 	public int getId() {
 		return id;
@@ -41,10 +42,10 @@ public class InvoiceReceived {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public Integer getInvoiceNo() {
+	public String getInvoiceNo() {
 		return invoiceNo;
 	}
-	public void setInvoiceNo(Integer invoiceNo) {
+	public void setInvoiceNo(String invoiceNo) {
 		this.invoiceNo = invoiceNo;
 	}
 	public Double getBillValue() {
@@ -59,17 +60,23 @@ public class InvoiceReceived {
 	public void setBillCheckedBy(Employee billCheckedBy) {
 		this.billCheckedBy = billCheckedBy;
 	}
-	public List<ProductsMap> getProductsMap() {
-		return productsMap;
+	public Product getProduct() {
+		return product;
 	}
-	public void setProductsMap(List<ProductsMap> productsMap) {
-		this.productsMap = productsMap;
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	public Integer getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
 	}
 
 	@Override
 	public String toString() {
 		return "InvoiceReceived [id=" + id + ", invoiceNo=" + invoiceNo + ", billValue=" + billValue
-				+ ", billCheckedBy=" + billCheckedBy + ", productsMap=" + productsMap + "]";
+				+ ", billCheckedBy=" + billCheckedBy + ", product=" + product + ", quantity=" + quantity + "]";
 	}
 	
 	

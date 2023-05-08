@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 public class Supplier {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	
 	@NotNull

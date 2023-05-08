@@ -1,27 +1,24 @@
 package com.incedo.smart_inventory.entities;
 
-import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
+
 @Entity
 public class InvoiceIssued {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	
 	@NotNull
-	@Column(name="invoice_no")
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int invoiceNo;
+	@Column(name="invoice_no", unique = true, length = 12)
+	private String invoiceNo = null;
 	
 	@NotNull
 	@Column(name="bill_value")
@@ -32,8 +29,12 @@ public class InvoiceIssued {
 	private Employee billCheckedBy = null;
 	
 	@NotNull
-	@OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-	private List<ProductsMap> products = null;
+	@OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private Product product = null;
+	
+	@NotNull
+	@Column(name="quantity")
+	private Integer quantity = null;
 
 	public int getId() {
 		return id;
@@ -41,10 +42,10 @@ public class InvoiceIssued {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public int getInvoiceNo() {
+	public String getInvoiceNo() {
 		return invoiceNo;
 	}
-	public void setInvoiceNo(int invoiceNo) {
+	public void setInvoiceNo(String invoiceNo) {
 		this.invoiceNo = invoiceNo;
 	}
 	public Double getBillValue() {
@@ -59,18 +60,23 @@ public class InvoiceIssued {
 	public void setBillCheckedBy(Employee billCheckedBy) {
 		this.billCheckedBy = billCheckedBy;
 	}
-	public List<ProductsMap> getProducts() {
-		return products;
+	public Product getProduct() {
+		return product;
 	}
-	public void setProductsMap(List<ProductsMap> products) {
-		this.products = products;
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	public Integer getQuantity() {
+		return quantity;
+	}
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
 	}
 
 	@Override
 	public String toString() {
 		return "InvoiceIssued [id=" + id + ", invoiceNo=" + invoiceNo + ", billValue=" + billValue + ", billCheckedBy="
-				+ billCheckedBy + ", products=" + products + "]";
+				+ billCheckedBy + ", product=" + product + ", quantity=" + quantity + "]";
 	}
-	
 	
 }

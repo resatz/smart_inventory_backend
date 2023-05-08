@@ -35,6 +35,9 @@ public class EmployeeController {
 	@Autowired
 	EmployeeRolesRepository employeeRolesRepository;
 	
+	@Autowired
+	GodownRepository godownRepository;
+	
 	@PostMapping(path=PATH)
 	public ResponseEntity addEmployees(@RequestBody Employee employee) {
 		if(employee.getRole() != null && employee.getRole().getId() > 0) {
@@ -47,6 +50,16 @@ public class EmployeeController {
 		}
 		
 		employee.setPassword(BCrypt.hashpw(employee.getPassword(), BCrypt.gensalt()));
+		
+		if (employee.getGodown() != null && employee.getGodown().getId() > 0) {
+			Optional<Godown> godownFound = godownRepository.findById(employee.getGodown().getId());
+			
+			if (godownFound.isEmpty()) {
+				return new ResponseEntity<String>("Godown with the given id not found.", HttpStatus.NOT_FOUND);
+			}
+			
+			employee.setGodown(godownFound.get());
+		}
 		
 		Employee saved = employeeRepository.save(employee);
 		return new ResponseEntity<Employee>(saved, HttpStatus.CREATED);
@@ -99,7 +112,22 @@ public class EmployeeController {
 			employee.setRole(employeeRoleFound.get());
 		}
 		
-		employee.setPassword(BCrypt.hashpw(employee.getPassword(), BCrypt.gensalt()));
+		if (employee.getPassword() != null) {
+			employee.setPassword(BCrypt.hashpw(employee.getPassword(), BCrypt.gensalt()));			
+		}
+		else {
+			employee.setPassword(employeeFound.get().getPassword());
+		}
+		
+		if (employee.getGodown() != null && employee.getGodown().getId() > 0) {
+			Optional<Godown> godownFound = godownRepository.findById(employee.getGodown().getId());
+			
+			if (godownFound.isEmpty()) {
+				return new ResponseEntity<String>("Godown with the given id not found.", HttpStatus.NOT_FOUND);
+			}
+			
+			employee.setGodown(godownFound.get());
+		}
 		
 		Employee saved = employeeRepository.save(employee);
 		return new ResponseEntity<Employee>(saved, HttpStatus.OK);
