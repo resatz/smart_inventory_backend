@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.Godown;
 import com.incedo.smart_inventory.entities.InvoiceIssued;
-import com.incedo.smart_inventory.entities.InvoiceReceived;
 import com.incedo.smart_inventory.entities.OutwardsProduct;
 import com.incedo.smart_inventory.entities.Product;
 import com.incedo.smart_inventory.entities.ProductsStock;
@@ -57,8 +57,13 @@ public class OutwardsProductController {
 	ProductsStockRepository productsStockRepository;
 	
 	@GetMapping(path=PATH)
-	public ResponseEntity<List<OutwardsProduct>> outwardsProduct() {
-		return new ResponseEntity<List<OutwardsProduct>>(outwardsProductRepository.findAll(), HttpStatus.OK);
+	public ResponseEntity<List<OutwardsProduct>> outwardsProduct(@RequestParam(name = "godownId", required = false) Integer godownId) {
+		if (godownId == null) {
+			return new ResponseEntity<List<OutwardsProduct>>(outwardsProductRepository.findAll(), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<List<OutwardsProduct>>(outwardsProductRepository.findAllByGodownId(godownId), HttpStatus.OK);
+		}
 	}
 	
 	@GetMapping(path=PATH + "/{id}")
@@ -122,12 +127,12 @@ public class OutwardsProductController {
 		
 		OutwardsProduct saved = outwardsProductRepository.save(outwardsProduct);
 		
-//		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(outwardsProduct.getProduct().getId(), outwardsProduct.getGodown().getId());
-//		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//		if (productsStockFound.isPresent()) {
-//			productsStockFound.get().setStock(productsStockFound.get().getStock() - outwardsProduct.getQuantity());
-//			productsStockRepository.save(productsStockFound.get());
-//		}
+		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(outwardsProduct.getProduct().getId(), outwardsProduct.getGodown().getId());
+		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+		if (productsStockFound.isPresent()) {
+			productsStockFound.get().setStock(productsStockFound.get().getStock() - outwardsProduct.getQuantity());
+			productsStockRepository.save(productsStockFound.get());
+		}
 		
 		return new ResponseEntity<OutwardsProduct>(saved, HttpStatus.CREATED);
 	}
@@ -203,31 +208,42 @@ public class OutwardsProductController {
 		
 		OutwardsProduct saved = outwardsProductRepository.save(outwardsProduct);
 		
-//		System.out.println(outwardsProduct.getQuantity() + " " + previousQuantity);
-//		System.out.println(outwardsProduct.getProduct().getId() + " " + previousProduct.getId());
-//		System.out.println(outwardsProduct.getGodown().getId() + " " + previousGodown.getId());
-//		if (outwardsProduct.getQuantity() != previousQuantity || outwardsProduct.getProduct().getId() != previousProduct.getId() || outwardsProduct.getGodown().getId() != previousGodown.getId()) {
-//			ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(previousProduct.getId(), previousGodown.getId());
-//			Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//			if (productsStockFound.isPresent()) {
-//				productsStockFound.get().setStock(productsStockFound.get().getStock() + previousQuantity);
-//				productsStockRepository.save(productsStockFound.get());
-//			}
-//			
-//			productsStockCompositeKey = new ProductsStockCompositeKey(outwardsProduct.getProduct().getId(), outwardsProduct.getGodown().getId());
-//			productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//			if (productsStockFound.isPresent()) {
-//				productsStockFound.get().setStock(productsStockFound.get().getStock() - outwardsProduct.getQuantity());
-//				productsStockRepository.save(productsStockFound.get());
-//			}
-//		}
+		if (outwardsProduct.getQuantity() != previousQuantity || outwardsProduct.getProduct().getId() != previousProduct.getId() || outwardsProduct.getGodown().getId() != previousGodown.getId()) {
+			ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(previousProduct.getId(), previousGodown.getId());
+			Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+			if (productsStockFound.isPresent()) {
+				productsStockFound.get().setStock(productsStockFound.get().getStock() + previousQuantity);
+				productsStockRepository.save(productsStockFound.get());
+			}
+			
+			productsStockCompositeKey = new ProductsStockCompositeKey(outwardsProduct.getProduct().getId(), outwardsProduct.getGodown().getId());
+			productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+			if (productsStockFound.isPresent()) {
+				productsStockFound.get().setStock(productsStockFound.get().getStock() - outwardsProduct.getQuantity());
+				productsStockRepository.save(productsStockFound.get());
+			}
+		}
 		
 		return new ResponseEntity<OutwardsProduct>(saved, HttpStatus.OK);
 	}
 	
 	@DeleteMapping(path=PATH + "/{id}")
-	public ResponseEntity<Void> deleteEntity(@PathVariable int id) {
+	public ResponseEntity<String> deleteEntity(@PathVariable int id) {
+		Optional<OutwardsProduct> outwardsProductFound = outwardsProductRepository.findById(id);
+		
+		if (outwardsProductFound.isEmpty()) {
+			return new ResponseEntity<String>("Record with the given id not found.", HttpStatus.NOT_FOUND);
+		}
+		
 		outwardsProductRepository.deleteById(id);
+		
+		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(outwardsProductFound.get().getProduct().getId(), outwardsProductFound.get().getGodown().getId());
+		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+		if (productsStockFound.isPresent()) {
+			productsStockFound.get().setStock(productsStockFound.get().getStock() + outwardsProductFound.get().getQuantity());
+			productsStockRepository.save(productsStockFound.get());
+		}
+		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	

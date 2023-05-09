@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Employee;
@@ -60,8 +61,13 @@ public class InwardsProductController {
 	ProductsStockRepository productsStockRepository;
 	
 	@GetMapping(path=PATH)
-	public ResponseEntity<List<InwardsProduct>> getProducts() {
-		return new ResponseEntity<List<InwardsProduct>>(inwardsProductRepository.findAll(), HttpStatus.OK);
+	public ResponseEntity<List<InwardsProduct>> getProducts(@RequestParam(name = "godownId", required = false) Integer godownId) {
+		if (godownId == null) {
+			return new ResponseEntity<List<InwardsProduct>>(inwardsProductRepository.findAll(), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<List<InwardsProduct>>(inwardsProductRepository.findAllByGodownId(godownId), HttpStatus.OK);
+		}
 	}
 	
 	@GetMapping(path=PATH + "/{id}")
@@ -134,20 +140,20 @@ public class InwardsProductController {
 		
 		InwardsProduct saved = inwardsProductRepository.save(inwardsProduct);
 		
-//		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(inwardsProduct.getProduct().getId(), inwardsProduct.getGodown().getId());
-//		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//		if (productsStockFound.isPresent()) {
-//			productsStockFound.get().setStock(productsStockFound.get().getStock() + inwardsProduct.getQuantity());
-//			productsStockRepository.save(productsStockFound.get());
-//		}
-//		else {
-//			ProductsStock productsStock = new ProductsStock();
-//			productsStock.setCompositeKey(productsStockCompositeKey);
-//			productsStock.setProduct(inwardsProduct.getProduct());
-//			productsStock.setGodown(inwardsProduct.getGodown());
-//			productsStock.setStock(inwardsProduct.getQuantity());
-//			productsStockRepository.save(productsStock);
-//		}
+		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(inwardsProduct.getProduct().getId(), inwardsProduct.getGodown().getId());
+		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+		if (productsStockFound.isPresent()) {
+			productsStockFound.get().setStock(productsStockFound.get().getStock() + inwardsProduct.getQuantity());
+			productsStockRepository.save(productsStockFound.get());
+		}
+		else {
+			ProductsStock productsStock = new ProductsStock();
+			productsStock.setCompositeKey(productsStockCompositeKey);
+			productsStock.setProduct(inwardsProduct.getProduct());
+			productsStock.setGodown(inwardsProduct.getGodown());
+			productsStock.setStock(inwardsProduct.getQuantity());
+			productsStockRepository.save(productsStock);
+		}
 		
 		return new ResponseEntity<InwardsProduct>(saved, HttpStatus.CREATED);
 	}
@@ -232,32 +238,29 @@ public class InwardsProductController {
 		
 		InwardsProduct saved = inwardsProductRepository.save(inwardsProduct);
 		
-//		System.out.println(inwardsProduct.getQuantity() + " " + previousQuantity);
-//		System.out.println(inwardsProduct.getProduct().getId() + " " + previousProduct.getId());
-//		System.out.println(inwardsProduct.getGodown().getId() + " " + previousGodown.getId());
-//		if (inwardsProduct.getQuantity() != previousQuantity || inwardsProduct.getProduct().getId() != previousProduct.getId() || inwardsProduct.getGodown().getId() != previousGodown.getId()) {
-//			ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(previousProduct.getId(), previousGodown.getId());
-//			Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//			if (productsStockFound.isPresent()) {
-//				productsStockFound.get().setStock(productsStockFound.get().getStock() - previousQuantity);
-//				productsStockRepository.save(productsStockFound.get());
-//			}
-//			
-//			productsStockCompositeKey = new ProductsStockCompositeKey(inwardsProduct.getProduct().getId(), inwardsProduct.getGodown().getId());
-//			productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//			if (productsStockFound.isPresent()) {
-//				productsStockFound.get().setStock(productsStockFound.get().getStock() + inwardsProduct.getQuantity());
-//				productsStockRepository.save(productsStockFound.get());
-//			}
-//			else {
-//				ProductsStock productsStock = new ProductsStock();
-//				productsStock.setCompositeKey(productsStockCompositeKey);
-//				productsStock.setProduct(inwardsProduct.getProduct());
-//				productsStock.setGodown(inwardsProduct.getGodown());
-//				productsStock.setStock(inwardsProduct.getQuantity());
-//				productsStockRepository.save(productsStock);
-//			}
-//		}
+		if (inwardsProduct.getQuantity() != previousQuantity || inwardsProduct.getProduct().getId() != previousProduct.getId() || inwardsProduct.getGodown().getId() != previousGodown.getId()) {
+			ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(previousProduct.getId(), previousGodown.getId());
+			Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+			if (productsStockFound.isPresent()) {
+				productsStockFound.get().setStock(productsStockFound.get().getStock() - previousQuantity);
+				productsStockRepository.save(productsStockFound.get());
+			}
+			
+			productsStockCompositeKey = new ProductsStockCompositeKey(inwardsProduct.getProduct().getId(), inwardsProduct.getGodown().getId());
+			productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+			if (productsStockFound.isPresent()) {
+				productsStockFound.get().setStock(productsStockFound.get().getStock() + inwardsProduct.getQuantity());
+				productsStockRepository.save(productsStockFound.get());
+			}
+			else {
+				ProductsStock productsStock = new ProductsStock();
+				productsStock.setCompositeKey(productsStockCompositeKey);
+				productsStock.setProduct(inwardsProduct.getProduct());
+				productsStock.setGodown(inwardsProduct.getGodown());
+				productsStock.setStock(inwardsProduct.getQuantity());
+				productsStockRepository.save(productsStock);
+			}
+		}
 		
 		return new ResponseEntity<InwardsProduct>(saved, HttpStatus.OK);
 	}

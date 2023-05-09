@@ -10,6 +10,6 @@ import com.incedo.smart_inventory.entities.ProductsStockCompositeKey;
 
 public interface ProductsStockRepository extends JpaRepository<ProductsStock, ProductsStockCompositeKey> {
 
-	public List<ProductsStock> findProductsByGodownId(int godownId);
+	public List<ProductsStock> findProductsStockByGodownId(int godownId);
 	
 }

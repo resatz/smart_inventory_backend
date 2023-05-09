@@ -15,15 +15,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.EmployeeRoles;
 import com.incedo.smart_inventory.entities.Godown;
+import com.incedo.smart_inventory.entities.ProductsStock;
 import com.incedo.smart_inventory.repositories.EmployeeRepository;
 import com.incedo.smart_inventory.repositories.EmployeeRolesRepository;
 import com.incedo.smart_inventory.repositories.GodownRepository;
+import com.incedo.smart_inventory.repositories.ProductsStockRepository;
 
 @RestController
 @RequestMapping("/api")
@@ -40,6 +41,9 @@ public class GodownController {
 	@Autowired
 	EmployeeRolesRepository employeeRolesRepository;
 	
+	@Autowired
+	ProductsStockRepository productsStockRepository;
+	
 	@GetMapping(path=PATH)
 	public ResponseEntity<List<Godown>> godown() {
 		return new ResponseEntity<List<Godown>>(godownRepository.findAll(), HttpStatus.OK);
@@ -54,6 +58,22 @@ public class GodownController {
 		}
 		
 		return new ResponseEntity<Godown>(godownFound.get(), HttpStatus.OK);
+	}
+	
+	@GetMapping(path=PATH + "/{id}/stock")
+	public ResponseEntity<List<ProductsStock>> getProductsStock(@PathVariable int id) {
+		return new ResponseEntity<List<ProductsStock>>(productsStockRepository.findProductsStockByGodownId(id)
+				.stream()
+				.filter(item -> item.getStock() != 0)
+				.toList(), HttpStatus.OK);
+	}
+	
+	@GetMapping(path=PATH + "/{id}/currentCapacity")
+	public ResponseEntity<Double> getCapacity(@PathVariable int id) {
+		return new ResponseEntity<Double>(productsStockRepository.findProductsStockByGodownId(id)
+				.stream()
+				.mapToDouble(item -> item.getStock() * item.getProduct().getWeight())
+				.sum(), HttpStatus.OK);
 	}
 
 	@PostMapping(path=PATH)

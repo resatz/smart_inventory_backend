@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.Godown;
 import com.incedo.smart_inventory.entities.InvoiceIssued;
+import com.incedo.smart_inventory.entities.InwardsProduct;
 import com.incedo.smart_inventory.entities.Product;
 import com.incedo.smart_inventory.entities.ProductsStock;
 import com.incedo.smart_inventory.entities.ProductsStockCompositeKey;
@@ -55,8 +57,13 @@ public class ReturnsProductController {
 	ProductsStockRepository productsStockRepository;
 
 	@GetMapping(path=PATH)
-	public List<ReturnsProduct> fetchAllReservations(){
-		return returnsProductRepository.findAll();
+	public ResponseEntity<List<ReturnsProduct>> fetchAllReservations(@RequestParam(name = "godownId", required = false) Integer godownId) {
+		if (godownId == null) {
+			return new ResponseEntity<List<ReturnsProduct>>(returnsProductRepository.findAll(), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<List<ReturnsProduct>>(returnsProductRepository.findAllByGodownId(godownId), HttpStatus.OK);
+		}
 	}
 
 	@GetMapping(path=PATH + "/{id}")
@@ -139,32 +146,29 @@ public class ReturnsProductController {
 		
 		ReturnsProduct saved = returnsProductRepository.save(returnsProduct);
 		
-//		System.out.println(returnsProduct.getQuantity() + " " + previousQuantity);
-//		System.out.println(returnsProduct.getProduct().getId() + " " + previousProduct.getId());
-//		System.out.println(returnsProduct.getGodown().getId() + " " + previousGodown.getId());
-//		if (returnsProduct.getQuantity() != previousQuantity || returnsProduct.getProduct().getId() != previousProduct.getId() || returnsProduct.getGodown().getId() != previousGodown.getId()) {
-//			ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(previousProduct.getId(), previousGodown.getId());
-//			Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//			if (productsStockFound.isPresent()) {
-//				productsStockFound.get().setStock(productsStockFound.get().getStock() - previousQuantity);
-//				productsStockRepository.save(productsStockFound.get());
-//			}
-//			
-//			productsStockCompositeKey = new ProductsStockCompositeKey(returnsProduct.getProduct().getId(), returnsProduct.getGodown().getId());
-//			productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//			if (productsStockFound.isPresent()) {
-//				productsStockFound.get().setStock(productsStockFound.get().getStock() + returnsProduct.getQuantity());
-//				productsStockRepository.save(productsStockFound.get());
-//			}
-//			else {
-//				ProductsStock productsStock = new ProductsStock();
-//				productsStock.setCompositeKey(productsStockCompositeKey);
-//				productsStock.setProduct(returnsProduct.getProduct());
-//				productsStock.setGodown(returnsProduct.getGodown());
-//				productsStock.setStock(returnsProduct.getQuantity());
-//				productsStockRepository.save(productsStock);
-//			}
-//		}
+		if (returnsProduct.getQuantity() != previousQuantity || returnsProduct.getProduct().getId() != previousProduct.getId() || returnsProduct.getGodown().getId() != previousGodown.getId()) {
+			ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(previousProduct.getId(), previousGodown.getId());
+			Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+			if (productsStockFound.isPresent()) {
+				productsStockFound.get().setStock(productsStockFound.get().getStock() - previousQuantity);
+				productsStockRepository.save(productsStockFound.get());
+			}
+			
+			productsStockCompositeKey = new ProductsStockCompositeKey(returnsProduct.getProduct().getId(), returnsProduct.getGodown().getId());
+			productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+			if (productsStockFound.isPresent()) {
+				productsStockFound.get().setStock(productsStockFound.get().getStock() + returnsProduct.getQuantity());
+				productsStockRepository.save(productsStockFound.get());
+			}
+			else {
+				ProductsStock productsStock = new ProductsStock();
+				productsStock.setCompositeKey(productsStockCompositeKey);
+				productsStock.setProduct(returnsProduct.getProduct());
+				productsStock.setGodown(returnsProduct.getGodown());
+				productsStock.setStock(returnsProduct.getQuantity());
+				productsStockRepository.save(productsStock);
+			}
+		}
 		
 		return new ResponseEntity<ReturnsProduct>(saved, HttpStatus.OK);
 	}
@@ -218,27 +222,41 @@ public class ReturnsProductController {
 		
 		ReturnsProduct saved = returnsProductRepository.save(returnsProduct);
 		
-//		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(returnsProduct.getProduct().getId(), returnsProduct.getGodown().getId());
-//		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
-//		if (productsStockFound.isPresent()) {
-//			productsStockFound.get().setStock(productsStockFound.get().getStock() + returnsProduct.getQuantity());
-//			productsStockRepository.save(productsStockFound.get());
-//		}
-//		else {
-//			ProductsStock productsStock = new ProductsStock();
-//			productsStock.setCompositeKey(productsStockCompositeKey);
-//			productsStock.setProduct(returnsProduct.getProduct());
-//			productsStock.setGodown(returnsProduct.getGodown());
-//			productsStock.setStock(returnsProduct.getQuantity());
-//			productsStockRepository.save(productsStock);
-//		}
+		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(returnsProduct.getProduct().getId(), returnsProduct.getGodown().getId());
+		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+		if (productsStockFound.isPresent()) {
+			productsStockFound.get().setStock(productsStockFound.get().getStock() + returnsProduct.getQuantity());
+			productsStockRepository.save(productsStockFound.get());
+		}
+		else {
+			ProductsStock productsStock = new ProductsStock();
+			productsStock.setCompositeKey(productsStockCompositeKey);
+			productsStock.setProduct(returnsProduct.getProduct());
+			productsStock.setGodown(returnsProduct.getGodown());
+			productsStock.setStock(returnsProduct.getQuantity());
+			productsStockRepository.save(productsStock);
+		}
 		
 		return new ResponseEntity<ReturnsProduct>(saved, HttpStatus.CREATED);
 	}
 	
 	@DeleteMapping(path=PATH + "/{id}")
-	public ResponseEntity<Void> deleteReturns(@PathVariable int id) {
+	public ResponseEntity<String> deleteReturns(@PathVariable int id) {
+		Optional<ReturnsProduct> returnsProductFound = returnsProductRepository.findById(id);
+		
+		if (returnsProductFound.isEmpty()) {
+			return new ResponseEntity<String>("Record with the given id not found.", HttpStatus.NOT_FOUND);
+		}
+		
 		returnsProductRepository.deleteById(id);
+		
+		ProductsStockCompositeKey productsStockCompositeKey = new ProductsStockCompositeKey(returnsProductFound.get().getProduct().getId(), returnsProductFound.get().getGodown().getId());
+		Optional<ProductsStock> productsStockFound = productsStockRepository.findById(productsStockCompositeKey);
+		if (productsStockFound.isPresent()) {
+			productsStockFound.get().setStock(productsStockFound.get().getStock() - returnsProductFound.get().getQuantity());
+			productsStockRepository.save(productsStockFound.get());
+		}
+		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	

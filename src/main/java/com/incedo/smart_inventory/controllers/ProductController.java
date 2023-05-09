@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.incedo.smart_inventory.entities.Product;
+import com.incedo.smart_inventory.entities.ProductsStock;
 import com.incedo.smart_inventory.repositories.ProductRepository;
+import com.incedo.smart_inventory.repositories.ProductsStockRepository;
 
 @RestController
 @RequestMapping("/api")
@@ -28,9 +31,21 @@ public class ProductController {
 	@Autowired
 	ProductRepository productRepository;
 	
+	@Autowired
+	ProductsStockRepository productsStockRepository;
+	
 	@GetMapping(path=PATH)
-	public ResponseEntity<List<Product>> product() {
-		return new ResponseEntity<List<Product>>(productRepository.findAll(), HttpStatus.OK);
+	public ResponseEntity<List<Product>> product(@RequestParam(name = "godownId", required = false) Integer godownId) {
+		if (godownId == null) {
+			return new ResponseEntity<List<Product>>(productRepository.findAll(), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<List<Product>>(productsStockRepository.findProductsStockByGodownId(godownId)
+					.stream()
+					.filter(item -> item.getStock() != 0)
+					.map(item -> item.getProduct())
+					.toList(), HttpStatus.OK);
+		}
 	}
 	
 	@GetMapping(path=PATH + "/{id}")
