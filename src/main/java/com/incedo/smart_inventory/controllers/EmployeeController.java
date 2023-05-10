@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.incedo.smart_inventory.controllers.models.ChangePasswordData;
+import com.incedo.smart_inventory.controllers.models.ErrorData;
 import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.entities.EmployeeRoles;
 import com.incedo.smart_inventory.entities.Godown;
@@ -68,14 +70,18 @@ public class EmployeeController {
 	}
 	
 	@PatchMapping(path=PATH + "/{id}/password")
-	public ResponseEntity<String> changePassword(@PathVariable int id, @RequestBody String newPassword) {
+	public ResponseEntity<ErrorData> changePassword(@PathVariable int id, @RequestBody ChangePasswordData changePasswordData) {
 		Optional<Employee> employeeFound = employeeRepository.findById(id);
         
 		if (employeeFound.isEmpty()) {
-        	return new ResponseEntity<String>("Employee with the given id not found.", HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<ErrorData>(new ErrorData("EMPID_NOT_FOUND", "Employee with the given id not found"), HttpStatus.NOT_FOUND);
         }
+		
+		if (!BCrypt.checkpw(changePasswordData.getCurrentPassword(), employeeFound.get().getPassword())) {
+			return new ResponseEntity<ErrorData>(new ErrorData("WRONG_PASSWORD", "The current password provided is incorrect"), HttpStatus.UNAUTHORIZED);
+		}
         
-        employeeFound.get().setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+        employeeFound.get().setPassword(BCrypt.hashpw(changePasswordData.getNewPassword(), BCrypt.gensalt()));
         
         employeeRepository.save(employeeFound.get());
         
@@ -134,7 +140,10 @@ public class EmployeeController {
 			employee.setRole(employeeRoleFound.get());
 		}
 		
-		if (employee.getPassword() != null) {
+		if (employee.getPassword() == employee.getUsername()) {
+			return new ResponseEntity<String>("Password cannot be the same as username.", HttpStatus.BAD_REQUEST);
+		}
+		else if (employee.getPassword() != null) {
 			employee.setPassword(BCrypt.hashpw(employee.getPassword(), BCrypt.gensalt()));			
 		}
 		else {

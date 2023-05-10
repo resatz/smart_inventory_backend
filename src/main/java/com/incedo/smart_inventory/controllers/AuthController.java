@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.incedo.smart_inventory.controllers.models.ErrorData;
 import com.incedo.smart_inventory.controllers.models.LoginData;
 import com.incedo.smart_inventory.entities.Employee;
 import com.incedo.smart_inventory.repositories.EmployeeRepository;
@@ -29,11 +30,11 @@ public class AuthController {
 		Optional<Employee> employeeFound = employeeRepository.findByUsername(loginData.getUsername());
 		
 		if (employeeFound.isEmpty()) {
-			return new ResponseEntity<String>("The username provided does not exist.", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<ErrorData>(new ErrorData("INVALID_USERNAME", "The username provided does not exist"), HttpStatus.NOT_FOUND);
 		}
 		
 		if (!BCrypt.checkpw(loginData.getPassword(), employeeFound.get().getPassword())) {
-			return new ResponseEntity<String>("The password provided is incorrect.", HttpStatus.UNAUTHORIZED);			
+			return new ResponseEntity<ErrorData>(new ErrorData("WRONG_PASSWORD", "The password provided is incorrect"), HttpStatus.UNAUTHORIZED);			
 		}
 		
 		return new ResponseEntity<Employee>(employeeFound.get(), HttpStatus.OK);
