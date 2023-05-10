@@ -2,6 +2,7 @@ package com.incedo.smart_inventory.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class ProductController {
 					.stream()
 					.filter(item -> item.getStock() != 0)
 					.map(item -> item.getProduct())
-					.toList(), HttpStatus.OK);
+					.collect(Collectors.toList()), HttpStatus.OK);
 		}
 	}
 	

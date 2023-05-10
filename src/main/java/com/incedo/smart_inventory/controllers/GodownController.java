@@ -3,6 +3,7 @@ package com.incedo.smart_inventory.controllers;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,7 @@ public class GodownController {
 		return new ResponseEntity<List<ProductsStock>>(productsStockRepository.findProductsStockByGodownId(id)
 				.stream()
 				.filter(item -> item.getStock() != 0)
-				.toList(), HttpStatus.OK);
+				.collect(Collectors.toList()), HttpStatus.OK);
 	}
 	
 	@GetMapping(path=PATH + "/{id}/currentCapacity")
