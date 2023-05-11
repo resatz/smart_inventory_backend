@@ -1,5 +1,8 @@
 package com.incedo.smart_inventory.common.exception_handlers;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.validation.ConstraintViolationException;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,14 +14,27 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.incedo.smart_inventory.controllers.models.ErrorData;
 
 @ControllerAdvice(basePackages = "com.incedo.smart_inventory.controllers")
 public class RestExceptionHandler {
 	
 	@ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    public ResponseEntity handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
 		if (ex.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
 			org.hibernate.exception.ConstraintViolationException nestedEx = (org.hibernate.exception.ConstraintViolationException) ex.getCause();
+						
+			if ("23505".equals(nestedEx.getSQLException().getSQLState())) {				
+				Pattern pattern = Pattern.compile("\\((\\w+)\\)=\\((\\w+)\\)");
+				Matcher matcher = pattern.matcher(nestedEx.getSQLException().getMessage());
+				if (matcher.find()) {
+					return new ResponseEntity<ErrorData>(new ErrorData("UNIQUE_CONSTRAINT_VIOLATION", "The value given for " + matcher.group(1) + " already exists", matcher.group(1), matcher.group(2)), HttpStatus.BAD_REQUEST);
+				}
+				else {
+					return new ResponseEntity<String>("Unique constraint violation. The value entered already exists.", HttpStatus.BAD_REQUEST);
+				}
+			}
+			
 			return new ResponseEntity<String>(nestedEx.getSQLException().getMessage().split("\n")[1], HttpStatus.BAD_REQUEST);
 		}
 		
