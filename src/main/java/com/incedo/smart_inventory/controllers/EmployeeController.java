@@ -64,6 +64,8 @@ public class EmployeeController {
 			
 			employee.setGodown(godownFound.get());
 		}
+
+		employee.setIsLocked(false);
 		
 		Employee saved = employeeRepository.save(employee);
 		return new ResponseEntity<Employee>(saved, HttpStatus.CREATED);
@@ -88,15 +90,39 @@ public class EmployeeController {
         return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
+	@PatchMapping(path=PATH + "/{id}/unlock")
+	public ResponseEntity<String> unlockEmployee(@PathVariable int id) {
+		Optional<Employee> employeeFound = employeeRepository.findById(id);
+		
+		if(employeeFound.isEmpty()) {
+			return new ResponseEntity<String>("Employee with the given id not found.", HttpStatus.NOT_FOUND);
+		}
+        
+		employeeFound.get().setIsLocked(false);
+    	employeeRepository.save(employeeFound.get());
+        
+        return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
 	
 	
 	@GetMapping(path=PATH)
 	public ResponseEntity<List<Employee>> fetchAllEmployees(@RequestParam(name = "godownId", required = false) Integer godownId) {
 		if (godownId == null) {
-			return new ResponseEntity<List<Employee>>(employeeRepository.findAll(), HttpStatus.OK);
+			return new ResponseEntity<List<Employee>>(employeeRepository.findAllByIsLocked(false), HttpStatus.OK);
 		}
 		else {
-			return new ResponseEntity<List<Employee>>(employeeRepository.findAllByGodownId(godownId), HttpStatus.OK);
+			return new ResponseEntity<List<Employee>>(employeeRepository.findAllByGodownIdAndIsLocked(godownId, false), HttpStatus.OK);
+		}
+	}
+	
+	@GetMapping(path=PATH + "/locked")
+	public ResponseEntity<List<Employee>> fetchAllLockedEmployees(@RequestParam(name = "godownId", required = false) Integer godownId) {
+		if (godownId == null) {
+			return new ResponseEntity<List<Employee>>(employeeRepository.findAllByIsLocked(true), HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<List<Employee>>(employeeRepository.findAllByGodownIdAndIsLocked(godownId, true), HttpStatus.OK);
 		}
 	}
 	
@@ -163,6 +189,8 @@ public class EmployeeController {
 				employee.getGodown().setManager(employee);
 			}
 		}
+		
+		employee.setIsLocked(employeeFound.get().getIsLocked());
 		
 		Employee saved = employeeRepository.save(employee);
 		return new ResponseEntity<Employee>(saved, HttpStatus.OK);

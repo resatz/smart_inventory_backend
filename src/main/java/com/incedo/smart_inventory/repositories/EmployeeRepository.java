@@ -14,4 +14,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
 	public List<Employee> findAllByGodownId(int godownId);
 	
+	public List<Employee> findAllByIsLocked(boolean isLocked);
+	
+	public List<Employee> findAllByGodownIdAndIsLocked(int godownId, boolean isLocked);
+	
 }

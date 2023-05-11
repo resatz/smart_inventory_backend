@@ -37,6 +37,9 @@ public class Employee {
 	
 	@OneToOne(cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH })
 	private Godown godown = null;
+	
+	@Column(name = "isLocked", columnDefinition = "BOOLEAN DEFAULT false")
+	private Boolean isLocked = null;
 
 	public int getId() {
 		return id;
@@ -88,10 +91,18 @@ public class Employee {
 		this.godown = godown;
 	}
 
+	public Boolean getIsLocked() {
+		return isLocked;
+	}
+
+	public void setIsLocked(Boolean isLocked) {
+		this.isLocked = isLocked;
+	}
+
 	@Override
 	public String toString() {
 		return "Employee [id=" + id + ", name=" + name + ", username=" + username + ", password=" + password + ", role="
-				+ role + "]";
+				+ role + ", isLocked=" + isLocked + "]";
 	}
 	
 }
