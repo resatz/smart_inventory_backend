@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.incedo</groupId>
-	<artifactId>smart_inventory</artifactId>
+	<artifactId>demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<name>demo</name>
 	<packaging>jar</packaging>
-	<name>smart_inventory</name>
 	<description>Smart Inventory Management Application</description>
 	<properties>
 		<java.version>11</java.version>
